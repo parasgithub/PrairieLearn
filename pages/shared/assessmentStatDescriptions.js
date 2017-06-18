@@ -24,16 +24,15 @@ var stat_descriptions = {
     description: '(first attempt correct percentage): The average percentage of instance' + ' questions' + ' with' + ' first_attempt_correct = true, ignoring nulls.'
   },
   LACP: {
-
     title: 'Last cor%',
     description: '(last attempt correct percentage): The average percentage of instance questions with last_attempt_correct = true, ignoring nulls.',
   },
   SSP: {
-    title: 'Some sub',
+    title: 'Some sub (%)',
     description: '(some submission percentage): The average percentage of instance questions' + ' with' +' some_subsmission = true.'
   },
   AOASR: {
-    title: 'ASR',
+    title: 'ASR (%)',
     description: '(average of average success rate): The average value of the' + ' average_success_rate over' +' all instance questions relating to an assessment question.'
   },
   ASRH: {

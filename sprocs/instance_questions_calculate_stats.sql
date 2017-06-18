@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION
-    instance_questions_calculate_stats(
+    calculate_stats_for_instance_question(
         instance_question_id_var bigint
     ) RETURNS VOID
 AS $$

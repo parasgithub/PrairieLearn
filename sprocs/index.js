@@ -105,10 +105,16 @@ module.exports = {
             'variants_select_for_assessment_instance_grading.sql',
             'variants_update_after_grading.sql',
             'variants_ensure_open.sql',
-            'assessment_questions_calculate_stats_for_assessment.sql',
             'assessment_questions_calculate_stats.sql',
+            'assessment_questions_calculate_stats_for_assessment.sql',
             'length_of_incorrect_streak.sql',
             'instance_questions_calculate_stats.sql',
+            'array_avg.sql',
+            'calculate_question_stats.sql',
+            'array_div.sql',
+            'weighted_avg.sql',
+            'weighted_arr_avg.sql',
+            'get_domain.sql',
         ], function(filename, callback) {
             logger.verbose('Loading ' + filename);
             fs.readFile(path.join(__dirname, filename), 'utf8', function(err, sql) {

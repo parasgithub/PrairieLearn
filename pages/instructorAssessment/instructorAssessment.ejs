@@ -37,8 +37,9 @@
               <th>Topic</th>
               <th>Tags</th>
               <th>Points</th>
-              <th width="100">Mean score</th>
-              <th width="100">Question score</th>
+              <th width="100">Mean score (%)</th>
+              <th width="100">Mean score (%) across assessments</th>
+              <th width="100">Predicted mean score (%)</th>
               <th>Attempts Histogram</th>
               <th>Other Assessments</th>
             </tr>
@@ -95,16 +96,21 @@
               </td>
               <td>
                 <% if (question.mean_score) { %>
-                  <%= question.mean_score.toFixed(3) %>
+                  <%= question.mean_score.toFixed(3) %> %
                 <% } %>
               </td>
               <td>
-                  <% if (question.avg_question_score_perc) { %>
+                <% if (question.avg_question_score_perc) { %>
                   <%= question.avg_question_score_perc.toFixed(3) %> %
-                  <% } %>
+                <% } %>
+              </td>
+              <td>
+                <% if (question.question_length_of_incorrect_streak_hist_with_some_correct_submission) { %>
+                  <%= question.expected_mean_score.toFixed(3) %> %
+                <% } %>
               </td>
               <td class="cell-center">
-                <% if (question.num_attempts_hist) { %>
+                <% if (question.num_attempts_histogram) { %>
                   <div id="attemptsHist<%= i %>" class="miniHist">
 
                   </div>
@@ -122,9 +128,9 @@
               </script>
               <td>
                 <% if (question.other_assessments) { %>
-                <% question.other_assessments.forEach(function(assessment) { %>
-                <%- include('../partials/assessment', {assessment: assessment}); %>
-                <% }); %>
+                  <% question.other_assessments.forEach(function(assessment) { %>
+                    <%- include('../partials/assessment', {assessment: assessment}); %>
+                  <% }); %>
                 <% } %>
               </td>
             </tr>
@@ -489,7 +495,7 @@
             </div>
             <div class="modal-footer">
               <form name="refresh-stats-form" method="POST">
-                <input type="hidden" name="postAction" value="refresh_stats">
+                <input type="hidden" name="__action" value="refresh_stats">
                 <input type="hidden" name="__csrf_token" value="<%= __csrf_token %>">
                 <input type="hidden" name="assessment_id" value="<%= assessment.id %>">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -587,6 +593,7 @@
                 var options = {
                   width: 60,
                   height: 20,
+                  ymax: 100,
                 };
                 histmini("#successRateHist<%= i %>", data, options);
               });
@@ -597,6 +604,7 @@
                 var options = {
                   width: 60,
                   height: 20,
+                  ymax: 100,
                 };
                 histmini("#incorrectStreakHistSomeSubmission<%= i %>", data, options);
               });
@@ -607,6 +615,7 @@
                 var options = {
                   width: 60,
                   height: 20,
+                  ymax: 100,
                 };
                 histmini("#incorrectStreakHistNoSubmission<%= i %>", data, options);
               });

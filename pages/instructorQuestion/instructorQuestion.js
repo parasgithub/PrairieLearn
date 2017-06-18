@@ -81,21 +81,51 @@ router.get('/', function(req, res, next) {
     async.series([
         (callback) => {
             sqldb.query(sql.assessment_question_stats, {question_id: res.locals.question.id}, function(err, result) {
-                if (ERR(err, callback)) return;
+                if (ERR(err, next)) return;
                 res.locals.assessment_stats = result.rows;
                 callback(null);
             });
         },
         (callback) => {
-            res.locals.question_attempts_histogram = null;
-            res.locals.question_attempts_before_giving_up_histogram = null;
-            res.locals.question_attempts_histogram_hw = null;
-            res.locals.question_attempts_before_giving_up_histogram_hw = null;
-            // res.locals.question_attempts_histogram = res.locals.result.question_attempts_histogram;
-            // res.locals.question_attempts_before_giving_up_histogram = res.locals.result.question_attempts_before_giving_up_histogram;
-            // res.locals.question_attempts_histogram_hw = res.locals.result.question_attempts_histogram_hw;
-            // res.locals.question_attempts_before_giving_up_histogram_hw = res.locals.result.question_attempts_before_giving_up_histogram_hw;
-            callback(null);
+            sqldb.query(sql.question_statistics, {question_id: res.locals.question.id}, function(err, result) {
+                if (ERR(err, next)) return;
+                let question_stats = [];
+                question_stats.push({
+                    domain_code: 'exams',
+                    domain_name: 'exams',
+                    stats: result.rows.filter(function (row) {
+                        return row.domain === 'Exams';
+                    })[0]
+                });
+                question_stats.push({
+                    domain_code: 'practice_exams',
+                    domain_name: 'practice exams',
+                    stats: result.rows.filter(function (row) {
+                        return row.domain === 'PracticeExams';
+                    })[0]
+                });
+                question_stats.push({
+                    domain_code: 'hws',
+                    domain_name: 'homeworks',
+                    stats: result.rows.filter(function (row) {
+                        return row.domain === 'HWs';
+                    })[0]
+                });
+
+                res.locals.question_stats = question_stats;
+                callback(null);
+            });
+        },
+        (callback) => {
+            sqldb.query(sql.select_histograms, {question_id: res.locals.question.id}, function(err, result) {
+                if (ERR(err, next)) return;
+
+                res.locals.question_attempts_histogram = result.rows[0].question_attempts_histogram;
+                res.locals.question_attempts_before_giving_up_histogram = result.rows[0].question_attempts_before_giving_up_histogram;
+                res.locals.question_attempts_histogram_hw = result.rows[0].question_attempts_histogram_hw;
+                res.locals.question_attempts_before_giving_up_histogram_hw = result.rows[0].question_attempts_before_giving_up_histogram_hw;
+                callback(null);
+            });
         },
         (callback) => {
             // req.query.variant_id might be undefined, which will generate a new variant

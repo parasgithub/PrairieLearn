@@ -9,6 +9,7 @@ var errorAbandonedJobs = require('./errorAbandonedJobs');
 var sendExternalGraderStats = require('./sendExternalGraderStats');
 var calculateAssessmentQuestionStats = require('./calculateAssessmentQuestionStats');
 var calculateAssessmentMode = require('./calculateAssessmentMode');
+var calculateQuestionStats = require('./calculateQuestionStats');
 
 module.exports = {
     init: function(callback) {
@@ -73,6 +74,7 @@ module.exports = {
       var statsJobs = [
         ['calculateAssessmentQuestionStats', calculateAssessmentQuestionStats],
         ['calculateAssessmentMode', calculateAssessmentMode],
+        ['calculateQuestionStats', calculateQuestionStats]
       ];
       that.queueJobs(statsJobs, config.statsCronIntervalMS);
     }

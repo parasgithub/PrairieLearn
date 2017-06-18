@@ -81,6 +81,12 @@
         <div class="panel-heading">
           <h3 class="panel-title">Num Attempts</h3>
         </div>
+        <div class="panel-body">
+          <% if (!(question_attempts_histogram && question_attempts_before_giving_up_histogram) &&
+                 !(question_attempts_histogram_hw && question_attempts_before_giving_up_histogram_hw)) { %>
+            No data
+          <% } %>
+        </div>
         <table class="table table-condensed table-hover two-column-description">
           <tbody>
             <% if (question_attempts_histogram && question_attempts_before_giving_up_histogram) { %>
@@ -135,6 +141,95 @@
           </tr>
           </thead>
           <tbody>
+          <% for (var i = 0; i < question_stats.length; i++) {
+              var domain_obj = question_stats[i];
+              var stats = domain_obj.stats;
+          %>
+          <tr>
+              <td>Average over <%= domain_obj.domain_name %></td>
+              <td>---</td>
+              <% if (stats) { %>
+              <td class="cell-center"><%= parseFloat(stats.mean_score_per_question).toFixed(1); %></td>
+              <td class="cell-center"><%= parseFloat(stats.discrimination).toFixed(1); %></td>
+              <td class="cell-center"><%= parseFloat(stats.average_number_attempts).toFixed(2); %></td>
+
+              <td class="cell-center"><div id="scoreHist<%= domain_obj.domain_code%>" class="miniHist"></div></td>
+              <script>
+                $(function() {
+                  var data = [<%= stats.quintile_scores %>];
+                  var options = {
+                    width: 60,
+                    height: 20,
+                    ymax: 100
+                  };
+                  histmini("#scoreHist<%= domain_obj.domain_code%>", data, options);
+                });
+              </script>
+              <td class="cell-center">
+                  <%= parseFloat(stats.some_correct_submission_perc).toFixed(1) %>
+              </td>
+              <td class="cell-center">
+                  <%= parseFloat(stats.first_attempt_correct_perc).toFixed(1) %>
+              </td>
+              <td class="cell-center">
+                  <%= parseFloat(stats.last_attempt_correct_perc).toFixed(1) %>
+              </td>
+              <td class="cell-center">
+                  <%= parseFloat(stats.some_submission_perc).toFixed(1) %></td>
+              <td class="cell-center">
+                  <%= parseFloat(stats.average_of_average_success_rates).toFixed(1) %></td>
+              <td class="cell-center">
+                  <div id="successRateHist<%= domain_obj.domain_code%>" class="miniHist"></div></td>
+              <td class="cell-center">
+                  <%= parseFloat(stats
+                          .average_length_of_incorrect_streak_with_some_correct_submission)
+                          .toFixed(2)
+                  %></td>
+              <td class="cell-center">
+                  <div id="incorrectStreakHistSomeSubmission<%= domain_obj.domain_code%>" class="miniHist"></div></td>
+              <td class="cell-center">
+                  <%= parseFloat(stats
+                          .average_length_of_incorrect_streak_with_no_correct_submission).toFixed(2)
+                  %></td>
+              <td class="cell-center">
+                  <div id="incorrectStreakHistNoSubmission<%= domain_obj.domain_code%>" class="miniHist"></div></td>
+              <script>
+                $(function() {
+                  var data = [<%= stats.average_success_rate_hist %>];
+                  var options = {
+                    width: 60,
+                    height: 20,
+                    ymax: 100,
+                  };
+                  histmini("#successRateHist<%= domain_obj.domain_code%>", data, options);
+                });
+              </script>
+              <script>
+                $(function() {
+                  var data = [<%= stats.length_of_incorrect_streak_hist_with_some_correct_submission %>];
+                  var options = {
+                    width: 60,
+                    height: 20,
+                    ymax: 100,
+                  };
+                  histmini("#incorrectStreakHistSomeSubmission<%= domain_obj.domain_code%>", data, options);
+                });
+              </script>
+              <script>
+                $(function() {
+                  var data = [<%= stats.length_of_incorrect_streak_hist_with_no_correct_submission %>];
+                  var options = {
+                    width: 60,
+                    height: 20,
+                    ymax: 100,
+                  };
+                  histmini("#incorrectStreakHistNoSubmission<%= domain_obj.domain_code%>", data, options);
+                });
+              </script>
+              <% } %>
+          </tr>
+          <% } %>
+
           <% assessment_stats.forEach(function(row, i) { %>
           <tr>
             <td>
@@ -174,6 +269,21 @@
             <% } else { %>
               <td class="cell-center"></td>
             <% } %>
+            <td class="cell-center">
+                <% if (row.some_correct_submission_perc) { %>
+                  <%= parseFloat(row.some_correct_submission_perc).toFixed(1) %>
+                <% } %>
+            </td>
+            <td class="cell-center">
+                <% if (row.first_attempt_correct_perc) { %>
+                  <%= parseFloat(row.first_attempt_correct_perc).toFixed(1) %>
+                <% } %>
+            </td>
+            <td class="cell-center">
+                <% if (row.last_attempt_correct_perc) { %>
+                  <%= parseFloat(row.last_attempt_correct_perc).toFixed(1) %>
+                <% } %>
+            </td>
             <td class="cell-center">
                 <% if (row.some_correct_submission_perc) { %>
                   <%= parseFloat(row.some_correct_submission_perc).toFixed(1) %>
@@ -232,6 +342,7 @@
                 var options = {
                   width: 60,
                   height: 20,
+                  ymax: 100,
                 };
                 histmini("#successRateHist<%= i %>", data, options);
               });
@@ -242,6 +353,7 @@
                 var options = {
                   width: 60,
                   height: 20,
+                  ymax: 100,
                 };
                 histmini("#incorrectStreakHistSomeSubmission<%= i %>", data, options);
               });
@@ -252,6 +364,7 @@
                 var options = {
                   width: 60,
                   height: 20,
+                  ymax: 100,
                 };
                 histmini("#incorrectStreakHistNoSubmission<%= i %>", data, options);
               });

@@ -32,7 +32,9 @@ SELECT
     (lag(ag.id) OVER (PARTITION BY ag.id ORDER BY aq.number) IS NULL) AS start_new_alternative_group,
     assessments_format_for_question(q.id,ci.id,a.id) AS other_assessments,
     coalesce(ec.open_error_count, 0) AS open_error_count,
-    question_scores.question_score AS avg_question_score_perc
+    question_scores.question_score AS avg_question_score_perc,
+    qs.length_of_incorrect_streak_hist_with_some_correct_submission AS question_length_of_incorrect_streak_hist_with_some_correct_submission,
+    qs.some_correct_submission_perc AS question_some_correct_submission_perc
 FROM
     assessment_questions AS aq
     JOIN questions AS q ON (q.id = aq.question_id)
@@ -43,6 +45,7 @@ FROM
     JOIN course_instances AS ci ON (ci.id = a.course_instance_id)
     LEFT JOIN error_count AS ec ON (ec.question_id = q.id)
     LEFT JOIN question_scores ON (question_scores.question_id = q.id)
+    LEFT JOIN question_statistics AS qs ON (qs.question_id = q.id AND qs.domain = get_domain(a.type, a.mode))
 WHERE
     a.id = $assessment_id
     AND aq.deleted_at IS NULL
