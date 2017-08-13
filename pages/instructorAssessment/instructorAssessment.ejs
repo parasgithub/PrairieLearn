@@ -230,7 +230,21 @@
 
       <!-- ###################################################################### -->
       <!-- ###################################################################### -->
-      
+
+      <% if (expected_assessment_score_perc) { %>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title"><%= assessment_set.name %> <%= assessment.number %>: Expected assessment score (%) </h3>
+          </div>
+          <div class="panel-body">
+            <%= expected_assessment_score_perc.toFixed(3) %>%
+          </div>
+        </div>
+      <% } %>
+
+      <!-- ###################################################################### -->
+      <!-- ###################################################################### -->
+
       <div class="panel panel-primary">
         <div class="panel-heading">
           <h3 class="panel-title"><%= assessment_set.name %> <%= assessment.number %>: Duration statistics</h3>

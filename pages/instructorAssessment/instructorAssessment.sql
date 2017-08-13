@@ -1,3 +1,51 @@
+-- BLOCK expected_assessment_score
+WITH expected_assessment_question_scores AS (
+    SELECT
+        dot(qs.length_of_incorrect_streak_hist_with_some_correct_submission, aq.points_list) / 100 * qs.some_correct_submission_perc / 100 AS score,
+        aq.max_points AS max_score,
+        aq.id AS assessment_question_id
+    FROM
+        assessment_questions AS aq
+        JOIN assessments AS a ON (a.id = aq.assessment_id)
+        LEFT JOIN question_statistics AS qs ON (qs.question_id = aq.question_id AND qs.domain = get_domain(a.type, a.mode))
+    WHERE
+        a.id = $assessment_id
+),
+expected_alternative_group_scores AS (
+    SELECT
+        sum(eaqs.score) * coalesce(ag.number_choose / count(aq.id), 1) AS score,
+        sum(eaqs.max_score) * coalesce(ag.number_choose / count(aq.id), 1) AS max_score,
+        coalesce(ag.number_choose, count(aq.id)) AS num_chosen_questions,
+        ag.id AS alternative_group_id
+    FROM
+        expected_assessment_question_scores AS eaqs
+        JOIN assessment_questions AS aq ON (aq.id = eaqs.assessment_question_id)
+        JOIN alternative_groups AS ag ON (ag.id = aq.alternative_group_id)
+    GROUP BY
+        ag.id
+),
+expected_zone_scores AS (
+    SELECT
+        sum(eags.score) * coalesce(z.number_choose / sum(eags.num_chosen_questions), 1) AS score,
+        sum(eags.max_score) * coalesce(z.number_choose / sum(eags.num_chosen_questions), 1) AS max_score
+    FROM
+        expected_alternative_group_scores AS eags
+        JOIN alternative_groups AS ag ON (ag.id = eags.alternative_group_id)
+        JOIN zones AS z ON (z.id = ag.zone_id)
+    GROUP BY
+        z.id
+),
+expected_assessment_scores AS (
+    SELECT
+        sum(ezs.score) / sum(ezs.max_score) * 100 AS score_perc
+    FROM
+        expected_zone_scores AS ezs
+)
+SELECT
+    eas.score_perc
+FROM
+    expected_assessment_scores AS eas;
+
 -- BLOCK questions
 WITH error_count AS (
     SELECT

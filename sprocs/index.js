@@ -115,6 +115,7 @@ module.exports = {
             'weighted_avg.sql',
             'weighted_arr_avg.sql',
             'get_domain.sql',
+            'dot.sql'
         ], function(filename, callback) {
             logger.verbose('Loading ' + filename);
             fs.readFile(path.join(__dirname, filename), 'utf8', function(err, sql) {

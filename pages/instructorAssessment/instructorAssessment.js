@@ -68,6 +68,15 @@ router.get('/', function(req, res, next) {
             callback(null);
         },
         function(callback) {
+            debug('query expected assessment score');
+            var params = {assessment_id: res.locals.assessment.id};
+            sqldb.query(sql.expected_assessment_score, params, function(err, result) {
+                if (ERR(err, callback)) return;
+                res.locals.expected_assessment_score_perc = result.rows[0].score_perc;
+                callback(null);
+            });
+        },
+        function(callback) {
             debug('query questions');
             var params = {
                 assessment_id: res.locals.assessment.id,
