@@ -136,6 +136,9 @@ module.exports = {
             'array_add.sql',
             'slice.sql',
             'first.sql',
+            'unnest_2d_to_1d.sql',
+            'get_total_score.sql',
+            'get_quintile_stats.sql',
         ], function(filename, callback) {
             logger.verbose('Loading ' + filename);
             fs.readFile(path.join(__dirname, filename), 'utf8', function(err, sql) {

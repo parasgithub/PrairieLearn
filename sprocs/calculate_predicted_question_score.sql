@@ -8,6 +8,7 @@ DECLARE
     result DOUBLE PRECISION;
     bound INTEGER;
 BEGIN
+--     RAISE NOTICE 'Calculating predicted score using info: %, %, %, %', qs_incremental_submission_score_array_averages, hw_qs_average_last_submission_score, points_list, max_points;
     IF points_list IS NULL OR max_points IS NULL THEN
         RETURN NULL;
     END IF;

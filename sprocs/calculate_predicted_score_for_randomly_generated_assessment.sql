@@ -94,6 +94,49 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
+DROP FUNCTION IF EXISTS calculate_predicted_score_quintiles_no_sd(BIGINT[], enum_statistic_domain);
+
+CREATE OR REPLACE FUNCTION
+    calculate_predicted_score_quintiles_no_sd(
+    IN generated_assessment_question_ids BIGINT[],
+    IN domain_var enum_statistic_domain,
+    OUT result DOUBLE PRECISION[]
+)
+AS $$
+BEGIN
+    WITH temp_table AS (
+        SELECT
+            quintiles.quintile AS quintile,
+            sum(score_perc.question_score_perc) / sum(aq.max_points) AS score_perc
+        FROM
+            assessment_questions AS aq
+            LEFT JOIN question_statistics AS qs
+                ON (qs.question_id = aq.question_id AND qs.domain = domain_var)
+            LEFT JOIN question_statistics AS hw_qs
+                ON (hw_qs.question_id = aq.question_id AND hw_qs.domain = get_domain('Homework', 'Public'))
+            JOIN generate_series(1, 5) AS quintiles (quintile) ON TRUE
+            -- pick from normal distribution with given mean and SD
+            JOIN LATERAL
+                     normal_rand(1,
+                                 -- mean
+                                 calculate_predicted_question_score(
+                                     slice(qs.incremental_submission_score_array_quintile_averages, quintiles.quintile),
+                                     hw_qs.average_last_submission_score_quintiles[quintiles.quintile],
+                                     aq.points_list,
+                                     aq.max_points) * aq.max_points / 100,
+                                 -- SD
+                                 0
+                     ) AS score_perc (question_score_perc) ON TRUE
+        WHERE
+            aq.id = ANY(generated_assessment_question_ids)
+        GROUP BY
+            quintiles.quintile
+        ORDER BY
+            quintiles.quintile
+    ) SELECT array_agg(temp_table.score_perc) AS arr FROM temp_table INTO result;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
 DROP FUNCTION IF EXISTS get_domain(BIGINT);
 
 CREATE OR REPLACE FUNCTION
@@ -152,7 +195,7 @@ $$ LANGUAGE plpgsql VOLATILE;
 
 DROP FUNCTION IF EXISTS get_randomly_generated_assessment_question_ids_multiple_reps(BIGINT, INTEGER);
 
-CREATE OR REPLACE FUNCTION
+CREATE FUNCTION
     get_randomly_generated_assessment_question_ids_multiple_reps(
     IN assessment_id_var BIGINT,
     IN num_reps INTEGER,
@@ -177,6 +220,38 @@ BEGIN
         FOR j in 1..num_assessment_questions_in_an_assessment LOOP
             total_generated_assessment_question_ids[i][j] = generated_assessment_question_ids[j];
         END LOOP;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+DROP FUNCTION IF EXISTS get_randomly_generated_assessment_question_ids_multiple_reps_new(BIGINT, INTEGER);
+
+CREATE FUNCTION get_randomly_generated_assessment_question_ids_multiple_reps_new(
+    assessment_id_var BIGINT,
+    num_reps INTEGER
+) RETURNS SETOF BIGINT[]
+AS $$
+DECLARE
+    generated_assessment_question_ids BIGINT[];
+BEGIN
+    FOR i in 1..num_reps LOOP
+        WITH generated_assessment_questions_ordered AS (
+            SELECT
+                aq.id
+            FROM
+                select_assessment_questions(assessment_id_var) AS generated_aq
+                JOIN assessment_questions AS aq ON (aq.id=generated_aq.assessment_question_id)
+            ORDER BY
+                aq.alternative_group_id
+        )
+        SELECT
+            array_agg(generated_assessment_questions_ordered.id)
+        FROM
+            generated_assessment_questions_ordered
+        INTO
+            generated_assessment_question_ids;
+
+        RETURN NEXT generated_assessment_question_ids;
     END LOOP;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
@@ -256,16 +331,18 @@ DROP FUNCTION IF EXISTS filter_generated_assessment(
     DOUBLE PRECISION[],
     DOUBLE PRECISION[],
     enum_statistic_domain,
-    DOUBLE PRECISION
+    DOUBLE PRECISION,
+    INTEGER
 );
 
-CREATE OR REPLACE FUNCTION
+CREATE FUNCTION
     filter_generated_assessment(
         IN generated_assessment_question_ids BIGINT[],
         IN means DOUBLE PRECISION[],
         IN sds DOUBLE PRECISION[],
         IN assessment_domain enum_statistic_domain,
         IN num_sds DOUBLE PRECISION,
+        IN disqualification_threshold INTEGER,
         OUT keep BOOLEAN
     )
 AS $$
@@ -274,14 +351,25 @@ DECLARE
     accepted_range_lower_bound DOUBLE PRECISION;
     accepted_range_upper_bound DOUBLE PRECISION;
     predicted_score DOUBLE PRECISION;
+    num_disqualified INTEGER;
 BEGIN
     num_questions = array_length(generated_assessment_question_ids, 1);
 
     keep = TRUE;
+    num_disqualified = 0;
+
+    SET log_min_messages TO 'notice';
 
     for quintile in 1..5 LOOP
         accepted_range_lower_bound = means[quintile] - num_sds * sds[quintile];
         accepted_range_upper_bound = means[quintile] + num_sds * sds[quintile];
+
+        RAISE NOTICE 'generated_assessment_question_ids: %', generated_assessment_question_ids;
+        RAISE NOTICE 'Quintile: %', quintile;
+        RAISE NOTICE 'Lower bound: %', accepted_range_lower_bound;
+        RAISE NOTICE 'Upper bound: %', accepted_range_upper_bound;
+        RAISE NOTICE 'Means: %', means;
+        RAISE NOTICE 'Sds: %', sds;
 
         SELECT
             sum(
@@ -303,11 +391,18 @@ BEGIN
 
         predicted_score = least(1, greatest(0, predicted_score));
 
+        RAISE NOTICE 'Predicted score: %', predicted_score;
+
         -- if predicted score is between the lower bound and the upper bound for all quintiles, then we keep it. Otherwise, we throw it.
         IF predicted_score < accepted_range_lower_bound OR predicted_score > accepted_range_upper_bound THEN
-            keep = FALSE;
+            RAISE NOTICE 'DISQUALIFIED';
+            num_disqualified = num_disqualified + 1;
         END IF;
     END LOOP;
+
+    IF num_disqualified > disqualification_threshold THEN
+        keep = FALSE;
+    END IF;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 

@@ -33,6 +33,7 @@ router.get('/', function(req, res, next) {
                 if (ERR(err, callback)) return;
                 res.locals.result = result.rows[0].result;
                 res.locals.quintile_result = result.rows[0].quintile_result;
+                console.log(result.rows[0].useful_data);
                 callback(null);
             });
         },

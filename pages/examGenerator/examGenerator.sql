@@ -39,7 +39,8 @@ useful_data AS (
             quintile_stats.means,
             quintile_stats.sds,
             get_domain($assessment_id),
-            $numSds
+            $numSds,
+            0
         ) AS keep,
         calculate_predicted_score_quintiles(
             generated_aq_ids_flattened.generated_assessment_question_ids,
@@ -84,7 +85,9 @@ result AS (
 )
 SELECT
     json_agg(result) AS result,
-    json_agg(quintile_result) AS quintile_result
+    json_agg(quintile_result) AS quintile_result,
+    json_agg(useful_data) AS useful_data
 FROM
     result
-    JOIN quintile_result ON TRUE;
+    JOIN quintile_result ON TRUE
+    JOIN useful_data ON TRUE
