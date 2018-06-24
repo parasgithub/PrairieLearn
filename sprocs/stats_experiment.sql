@@ -27,26 +27,6 @@ COPY (
             relevant_assessments
             JOIN LATERAL get_quintile_stats(relevant_assessments.id) AS quintile_stats ON quintile_stats.assessment_id = relevant_assessments.id
     ),
-    generated_assessments AS (
-        SELECT
-            row_number() OVER () AS assessment_id,
-            generated_assessment_question_ids,
-            filter_generated_assessment(generated_assessment_question_ids, quintile_stats.means, quintile_stats.sds, 'Exams', :num_sds, :disqualification_threshold) AS keep
-        FROM
-            relevant_assessments AS a
-            CROSS JOIN num_exams
-            CROSS JOIN quintile_stats
-            CROSS JOIN get_randomly_generated_assessment_question_ids_multiple_reps_new(a.id, num_exams.num_exams)
-                AS generated_assessment_question_ids
-    ),
-    generated_assessments_flattened AS (
-        SELECT
-            ga.assessment_id,
-            ga.keep,
-            unnest(ga.generated_assessment_question_ids) AS generated_assessment_question_id
-        FROM
-            generated_assessments AS ga
-    ),
     relevant_questions AS (
         SELECT
             q.id
@@ -72,29 +52,50 @@ COPY (
             u.user_id,
             q.id
     ),
-    expected_assessment_question_scores AS (
+    generated_assessments AS (
+        SELECT
+            row_number() OVER () AS assessment_id,
+            generated_assessment_question_ids,
+            filter_generated_assessment(generated_assessment_question_ids, quintile_stats.means, quintile_stats.sds, 'Exams', :num_sds, 0) AS keep
+        FROM
+            relevant_assessments AS a
+            CROSS JOIN num_exams
+            CROSS JOIN quintile_stats
+            CROSS JOIN get_randomly_generated_assessment_question_ids_multiple_reps_new(a.id, num_exams.num_exams)
+                AS generated_assessment_question_ids
+    ),
+    generated_assessments_flattened AS (
+        SELECT
+            ga.assessment_id,
+            ga.keep,
+            unnest(ga.generated_assessment_question_ids) AS generated_assessment_question_id
+        FROM
+            generated_assessments AS ga
+    ),
+    expected_assessment_scores AS (
         SELECT
             u.user_id AS user_id,
-            ga.generated_assessment_question_id AS generated_assessment_question_id,
-            ga.keep AS keep,
             ga.assessment_id AS assessment_id,
-            rqs.actual_score AS actual_score
+            avg(rqs.actual_score) AS actual_assessment_score
         FROM
             relevant_users AS u
             CROSS JOIN generated_assessments_flattened AS ga
             JOIN assessment_questions AS aq ON (ga.generated_assessment_question_id = aq.id)
             JOIN questions AS q ON (aq.question_id = q.id)
             JOIN relevant_question_scores AS rqs ON (rqs.user_id = u.user_id AND q.id = rqs.question_id)
+        GROUP BY
+            ga.assessment_id,
+            u.user_id
     ),
     to_export AS (
         SELECT
-            expected_assessment_question_scores.user_id AS "User ID",
-            expected_assessment_question_scores.assessment_id AS "Assessment ID",
-            expected_assessment_question_scores.actual_score * 100 AS "Score",
-            expected_assessment_question_scores.generated_assessment_question_id AS "Assessment Question ID",
-            expected_assessment_question_scores.keep AS "Keep"
+            expected_assessment_scores.user_id AS "User ID",
+            expected_assessment_scores.assessment_id AS "Assessment ID",
+            expected_assessment_scores.actual_assessment_score * 100 AS "Score",
+            ga.keep AS "Keep"
         FROM
-            expected_assessment_question_scores
+            generated_assessments AS ga
+            JOIN expected_assessment_scores ON (ga.assessment_id = expected_assessment_scores.assessment_id)
             CROSS JOIN num_exams
     ) SELECT * FROM to_export
 ) TO :output_filename CSV HEADER;
