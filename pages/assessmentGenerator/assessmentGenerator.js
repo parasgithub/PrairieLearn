@@ -2,7 +2,7 @@ var ERR = require('async-stacktrace');
 var async = require('async');
 var express = require('express');
 var router = express.Router();
-var debug = require('debug')('prairielearn:examGenerator');
+var debug = require('debug')('prairielearn:assessmentGenerator');
 
 var sqldb = require('../../lib/sqldb');
 var sqlLoader = require('../../lib/sql-loader');

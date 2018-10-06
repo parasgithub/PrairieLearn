@@ -66,7 +66,7 @@ BEGIN
     RETURN QUERY
         WITH generated_aq_ids AS (
             SELECT
-                get_randomly_generated_assessment_question_ids_multiple_reps(a.id, 100) AS generated_assessment_question_ids
+                get_randomly_generated_assessment_question_ids_multiple_reps(a.id, 1000) AS generated_assessment_question_ids
             FROM
                 assessments AS a
             WHERE

@@ -15,7 +15,18 @@ function stacked_histogram(selector, data, data2, bucketNames, options) {
         bottomMargin: 55,
         leftMargin: 70,
         xAxisScale: null,
+        normalize: false
     });
+
+    function normalize(data) {
+        const total = data.reduce((sum, value) => sum + value);
+        return data.map(val => val / total);
+    }
+
+    if (options.normalize) {
+        data = normalize(data);
+        data2 = normalize(data2);
+    }
 
     var width = 600 - options.leftMargin - options.rightMargin;
     var height = 371 - options.topMargin - options.bottomMargin;

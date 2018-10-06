@@ -18,7 +18,7 @@ COPY (
         FROM
             assessments AS a
         WHERE
-            a.tid='custom_quiz'
+            a.tid=:tid
     ),
     quintile_stats AS (
         SELECT
@@ -61,7 +61,7 @@ COPY (
             relevant_assessments AS a
             CROSS JOIN num_exams
             CROSS JOIN quintile_stats
-            CROSS JOIN get_randomly_generated_assessment_question_ids_multiple_reps_new(a.id, num_exams.num_exams)
+            CROSS JOIN get_generated_aq_ids_multiple_reps_as_rows(a.id, num_exams.num_exams)
                 AS generated_assessment_question_ids
     ),
     generated_assessments_flattened AS (

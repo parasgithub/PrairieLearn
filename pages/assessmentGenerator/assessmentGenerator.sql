@@ -42,7 +42,7 @@ useful_data AS (
             $numSds,
             0
         ) AS keep,
-        calculate_predicted_score_quintiles(
+        calculate_predicted_score_quintiles_no_sd(
             generated_aq_ids_flattened.generated_assessment_question_ids,
             get_domain($assessment_id)
         ) AS predicted_quintile_scores

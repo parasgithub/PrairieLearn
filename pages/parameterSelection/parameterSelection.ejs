@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('../partials/head'); %>
+    <script type="text/javascript" src="/javascripts/lodash.min.js"></script>
+    <script type="text/javascript" src="/javascripts/d3.min.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery.tablesorter.widgets.js"></script>
+    <script type="text/javascript" src="/localscripts/histogram.js"></script>
+    <script type="text/javascript" src="/localscripts/scatter.js"></script>
+    <script type="text/javascript" src="/localscripts/histmini.js"></script>
+    <script type="text/javascript" src="/localscripts/parallel_histograms.js"></script>
+    <script type="text/javascript" src="/localscripts/stacked_histogram.js"></script>
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <link href="/stylesheets/theme.bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <style>
+        .slider_container_div .custom_handle {
+            width: 3em;
+            height: 1.6em;
+            top: 50%;
+            margin-top: -.8em;
+            text-align: center;
+            line-height: 1.6em;
+        }
+        .inline-block {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<script>
+    $(function () {
+        const num_sds_slider_selector = "#num_sds_slider";
+        const num_sds_slider_handle_selector = "#custom_handle_num_sds";
+
+        const num_buckets_slider_selector = "#num_buckets_slider";
+        const num_buckets_slider_handle_selector = "#custom_handle_num_buckets";
+
+        const update_button_selector = "#update_button";
+
+        const update_slider_values = function() {
+            const num_sds_slider = $(num_sds_slider_selector).slider("instance");
+            const num_buckets_slider = $(num_buckets_slider_selector).slider("instance");
+
+            $(num_sds_slider_handle_selector).html(num_sds_slider.value());
+            $(num_buckets_slider_handle_selector).html(num_buckets_slider.value());
+            $(update_button_selector).attr(
+                'href', "<%= urlPrefix %>/parameter_selection/assessment/<%= assessment.id %>" +
+                    "?num_sds=" + num_sds_slider.value() +
+                    "&num_buckets=" + num_buckets_slider.value()
+            )
+        }
+
+        const num_sds = <%= num_sds %>;
+        const num_buckets = <%= num_buckets %>;
+
+        $(num_sds_slider_selector).slider({
+                step: 0.1,
+                min: 0.1,
+                max: 2.0,
+                value: num_sds,
+                change: update_slider_values
+            }
+        );
+
+        $(num_buckets_slider_selector).slider({
+                step: 5,
+                min: 5,
+                max: 100,
+                value: num_buckets,
+                change: update_slider_values
+            }
+        );
+
+        $(update_button_selector).button();
+
+        update_slider_values();
+    });
+</script>
+<%- include('../partials/navbar', {navPage: 'assessment'}); %>
+<div id="content" class="container">
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Num SDs Cutoff Parameter Selection Page for
+                <a href="<%= urlPrefix %>/assessment/<%= assessment.id %>"><%= assessment.title %></a>
+            </h3>
+        </div>
+        <div class="panel-body">
+            <form class="form-horizontal">
+                <div class="form-group col-sm-8">
+                    <label class="control-label col-sm-2" for="num_sds_slider">
+                        Num-sds parameter:
+                    </label>
+                    <div class="col-sm-6 inline-block">
+                        <div id="num_sds_slider" class="w-100 slider_container_div">
+                            <div id="custom_handle_num_sds" class="ui-slider-handle custom_handle"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-8">
+                    <label class="control-label col-sm-2" for="num_buckets_slider">
+                        Num buckets:
+                    </label>
+                    <div class="col-sm-6 inline-block">
+                        <div id="num_buckets_slider" class="w-100 slider_container_div">
+                            <div id="custom_handle_num_buckets" class="ui-slider-handle custom_handle"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-8">
+                        <a id="update_button">Update</a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- ###################################################################### -->
+            <!-- ###################################################################### -->
+
+            <hr/>
+
+            <div class="panel-heading">
+                <h4 class="panel-title">Predicted results</h4>
+            </div>
+
+            <div class="panel-body">
+                <div class="col-sm-4">
+                    Num exams kept: <%= num_exams_kept %> / 1000
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="col-sm-4">
+                    SD before: <%= formatFloat(sd_before * 100, 3) %> %
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="col-sm-4">
+                    SD after: <%= formatFloat(sd_after * 100, 3) %> %
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="col-sm-4">
+                    SD perc. diff: <%= formatFloat(sd_perc_improvement, 3) %> %
+                </div>
+            </div>
+
+            <div id="scoreHistOverall" class="scoreHistogram"></div>
+
+            <div class="panel">
+                Key:
+                <br>
+                <span class="outlineBarColor">Blue</span> represents assessments that we keep
+                <br>
+                <span class="outlineBarRedColor">Red</span> represents assessments that we filter out
+            </div>
+
+            <script>
+                $(function() {
+                    const numBuckets = <%= num_buckets %>;
+                    const data = [ <%= result.filter(obj => obj.keep)[0].predicted_score_hist %>];
+                    const negativeData = [ <%= result.filter(obj => !obj.keep)[0].predicted_score_hist %>];
+                    const xgrid = _.range(0, 100, 100 / numBuckets);
+                    const options = {
+                        ymin: 0,
+                        xlabel: 'Average Assessment Score / %',
+                        ylabel: 'Num. Assessments in Bucket (out of 1000)',
+                        xmin: 0,
+                        xmax: 100,
+                        xAxisScale: d3.scale.linear().domain([0, 100])
+                    };
+                    stacked_histogram("#scoreHistOverall", data, negativeData, xgrid, options);
+                });
+            </script>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
