@@ -35,11 +35,12 @@ Access restriction | courseInstance | assessment | Meaning | Example
 `uids`             | ✓ | ✓ | Require one of the UIDs in the array to access.                     | `"uids": ["mwest@illinois.edu", "zilles@illinois.edu"]`
 `startDate`        | ✓ | ✓ | Only allow access after this date.                                  | `"startDate": "2015-01-19T00:00:01"`
 `endDate`          | ✓ | ✓ | Only access access before this date.                                | `"endDate": "2015-05-13T23:59:59"`
-`institution`      | ✓ |   | Only people from this institution ("UIUC", "ZJUI", or "Any").       | `"institution": "UIUC"`
+`institution`      | ✓ |   | Only people from this institution ("UIUC", "ZJUI", "LTI", or "Any"). | `"institution": "UIUC"`
 `mode`             |   | ✓ | Only allow access from this server mode.                            | `"mode": "Exam"`
 `credit`           |   | ✓ | Maximum credit as percentage of full credit (can be more than 100). | `"credit": 100`
 `timeLimitMin`     |   | ✓ | Time limit in minutes to complete an assessment (only for Exams).   | `"timeLimitMin": 60`
 `password`         |   | ✓ | Password required to start an assessment (only for Exams).          | `"password": "mysecret"`
+`examUuid`         |   | ✓ | Exam scheduler UUID that students must register for.                | `"examId": "5719ebfe-ad20-42b1-b0dc-c47f0f714871"`
 
 Each access rule will only grant access if all of the restrictions are satisfied.
 
@@ -86,7 +87,8 @@ For students taking remote exams it can be helpful to have an enforced time limi
     {
         "startDate": "2015-01-19T00:00:01",
         "endDate": "2015-05-13T23:59:59",
-        "timeLimitMin": 50
+        "timeLimitMin": 50,
+        "credit": 100
     }
 ]
 ```
@@ -105,12 +107,28 @@ Remote or online exams sometimes use a “proctor password” to control access 
         "mode": "Public",
         "startDate": "2015-01-19T00:00:01",
         "endDate": "2015-05-13T23:59:59",
-        "password": "mysecret"
+        "password": "mysecret",
+        "credit": 100
     }
 ]
 ```
 
 Before a student can do the exam, a proctor will need to type the phrase `mysecret` into the password field on the exam start page.
+
+## Exam UUIDs
+
+To require that students are taking a particular exam in the Computer-Based Testing Facility (CBTF), the `examUuid` should be set to the UUID value from the scheduler app. For example:
+
+```
+"allowAccess": [
+    {
+        "examUuid": "5719ebfe-ad20-42b1-b0dc-c47f0f714871",
+        "credit": 100
+    }
+]
+```
+
+Note that in this case it is not necessary to specify the `mode` or any date ranges. These will be automatically determined by the scheduler app and should not be set in PrairieLearn.
 
 ## Course instance example
 

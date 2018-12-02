@@ -8,6 +8,250 @@
   * Add predicted scores on instructor assessment page (Paras Sud)
   
   * Add exam generator page (Paras Sud)
+  * Add Learning Tools Interoperability LTI 1.1.1 tool provider functionality (Dave Mussulman).
+
+  * Add course instance admin subpages (Dave Mussulman).
+
+  * Add networkx Python library to plbase (Nathan Bowman).
+
+  * Add read-only API for instructors to access assessment data (Nathan Walters).
+
+  * Add networkx Python library to centos7-python (Nathan Bowman).
+
+  * Add ability to "Grade all saved answers" on exam assessment overview (Dave Mussulman).
+
+  * Add dead letter reporting to Slack (Matt West).
+
+  * Add more logging for external grading jobs in production (Matt West).
+
+  * Add documentation on common development errors to FAQ. (James Balamuta).
+
+  * Add R Data Packages and SQLite connection to centos-plbase. (James Balamuta).
+
+  * Add R package caching and parallel installation to centos-plbase. (James Balamuta).
+  
+  * Change "Save & Grade" button text and alignment (Dave Mussulman).
+
+  * Change Ace editor to use source files from npm and upgrade to 1.4.1 from 1.2.8 (Nathan Walters).
+
+  * Change external grading to receive results from an SQS queue instead of a webhook (Nathan Walters).
+
+  * Change Exam question generation to first-access time (Matt West).
+
+  * Change assessment access rule examId linking to examUuid (Dave Mussulman).
+
+  * Fix load-reporting close during unit tests (Matt West).
+
+  * Fix PL / scheduler linking stored procedure to allow linked exams and fix bugs (Dave Mussulman).
+
+  * Fix responsiveness and centering of images displayed with `pl-figure` (James Balamuta, h/t Dave Mussulman).
+
+  * Fix STDERR data logging on Python start (Matt West).
+
+  * Fix HTML on LTI configuration page (Matt West).
+
+  * Fix LTI configuration flow configuration (Matt West).
+
+  * Fix GitHub links to exampleCourse questions (Dave Mussulman).
+
+  * Fix exclude file list for code coverage (Matt West).
+
+  * Fix `dump_filter.sh` to keep `authn_users` in all tables (Matt West).
+  
+  * Fix issues link on instructor question page (Nathan Walters).
+
+  * Fix `users.lti_course_instance_id` foreign key delete action (Matt West).
+
+  * Remove `allowIssueReporting` option in `infoCourseInstance.json` (Matt West).
+
+  * Remove old temporary upgrade flag `tmp_upgraded_iq_status` (Matt West).
+
+* __3.1.0__ - 2018-10-08
+
+  * Add string input element (Mariana Silva).
+
+  * Add element to display matrix in latex format (Mariana Silva).
+
+  * Add student name and clickable e-mail address information to issue reports (James Balamuta).
+
+  * Add `tools/dump_*` scripts to filter and anonymize per-course dumps (Matt West).
+
+  * Add `pl-prairiedraw-figure` element and update PrairieDraw graphics documentation. (Ray Essick).
+
+  * Add Control-C hint on server startup (Dave Mussulman).
+
+  * Add improved login screen (Nathan Walters).
+
+  * Add `pl-matrix-component-input` element (Mariana Silva).
+
+  * Add new question renderer behind feature flag (Nathan Walters).
+
+  * Add partial credit option to `pl-checkbox` element (Mariana Silva).
+
+  * Add docs and two optional attributes, `display` and `label`, to `pl-symbolic-input` (Tim Bretl).
+
+  * Add `prevent-select` attribute to `pl-code` element (Nathan Walters).
+
+  * Add personal access token management (Nathan Walters).
+
+  * Add `maxPoints` option to zones (Tim Bretl).
+
+  * Add `bestQuestions` option to zones (Tim Bretl).
+
+  * Add `allow-complex` attribute for `pl-symbolic-input` (Tim Bretl).
+
+  * Add warm up for Python worker processes (Matt West).
+
+  * Add better handling of client sockets on externally graded questions (Nathan Walters).
+
+  * Add postgresql permissions for root in Docker for development (Dave Mussulman).
+
+  * Add CSV scores upload for questions or assessments (Matt West).
+
+  * Add Pillow to the `centos7-python` container (Dave Mussulman).
+
+  * Add more question and assessment JSON validity checking on load (Dave Mussulman).
+
+  * Add scroll bar in `pl-matrix-component-input` (Mariana Silva)
+
+  * Fix `pl-file-editor` to allow display empty text editor and add option to include text from source file (Mariana Silva).
+
+  * Fix HTML rendering by reverting `cheerio.js` to `0.22.0` (Matt West).
+
+  * Fix Google auth using new API (Matt West).
+
+  * Fix several issues with various elements (Nathan Walters).
+
+  * Fix error when rendering ungraded external grading submissions (Matt West).
+
+  * Fix sync failure if a course instance has no `assessments` directory and add warning in sync log (Ray Essick).
+
+  * Fix Slack posting for student cheating reports (Matt West).
+
+  * Fix assessment instance page to only show 'Finish assessment' button for password and SEB exams (Dave Mussulman).
+
+  * Fix assessment time limits (Matt West).
+
+  * Fix copy button after `clipboard.js` package update (Tim Bretl).
+
+  * Fix `pl-multiple-choice` so feedback is inside label and so inline option produces valid HTML (Tim Bretl).
+
+  * Fix "Logout" button with Google authentication (Matt West).
+
+  * Fix error message when an authentication method is not enabled (Matt West).
+
+  * Fix "Logout" button with Azure authentication (Matt West).
+
+  * Fix docs for `clientServerFiles` template variables (Rahul Rameshbabu).
+
+  * Fix bug with rendering when the render cache is disabled (Nathan Walters).
+
+  * Fix outdated pycryptdome version (to 3.6.6) (Matt West).
+
+  * Fix bug in `pl-symbolic-input` to handle submission of function names without arguments (Tim Bretl).
+
+  * Fix bug in `pl-symbolic-input` to handle submissions that simplify to invalid expressions (Tim Bretl).
+
+  * Fix bug in `pl-symbolic-input` to handle the sympy constants I and E properly (Tim Bretl).
+
+  * Fix markup in `pl-multiple-choice` and `pl-checkbox` elements (Nathan Walters).
+
+  * Fix slow v3 questions by using persistent forking python processes (Matt West).
+
+  * Fix spurious `warnOldJobs` log entries (Matt West).
+
+  * Fix label on `pl-string-input` help popover (Matt West).
+
+  * Fix restart of Python `codeCallers` with no active child (Matt West).
+
+  * Fix exampleCourse exam1 to include formula sheet example per docs (Dave Mussulman).
+
+  * Fix docs for `allowIssueReporting` (Matt West).
+
+  * Fix `pl-matrix-component-input` element to adjust height (Mariana Silva).
+
+  * Fix real-time external grading results in exam mode by disabling exam-specific message in the question score panel (Nathan Walters).
+
+  * Fix `tools/dump_filter.sh` to drop `pg_stat_statements` for PostgreSQL 10 (Matt West).
+
+  * Fix slow assessment instance deletes (Matt West).
+
+  * Fix `triangularDistributedLoad` in `PrairieDraw.js` (Mariana Silva).
+
+  * Fix unexpected token error in administrator overview page (Tim Bretl).
+
+  * Fix `pl-matrix-component-input` rendering bug on Safari (Nicolas Nytko).
+
+  * Change `pl-code` to display code from a source file OR inline text (Mariana Silva).
+
+  * Change element names to use dashes instead of underscores (Nathan Walters).
+
+  * Change deprecated `new Buffer()` calls to `Buffer.from()` (Ray Essick).
+
+  * Change to Node.js 10 and PostgreSQL 10 (Matt West).
+
+  * Change `centos7-ocaml` grader image to `ocaml-4.05` (Matt West).
+
+  * Change TravisCI tasks to run linters first (Matt West, h/t James Balamuta).
+
+  * Change element attributes to use hyphens instead of underscores (Nathan Walters).
+
+  * Change assessment password protection method (Dave Mussulman).
+
+  * Change "0 rows" error to be more descriptive (Dave Mussulman).
+
+  * Change Exam authentication options to always include Google and Azure (Matt West).
+
+  * Change maximum JSON POST size to 1MB (Nathan Walters).
+
+  * Change to prohibit extra `allowAccess` properties (Geoffrey Challen).
+
+  * Change maximum JSON POST size to 1MB or local grader (Nathan Walters).
+
+  * Change required package versions for security (Dave Mussulman).
+
+  * Change `allowIssueReporting` to default to `true` (Matt West).
+
+  * Change `pl-string-input` to include an attribute for the placeholder (Mariana Silva).
+
+  * Change element documentation to add placeholder attribute to `pl-string-input` (Mariana Silva).
+
+  * Change instructor assessment page into multiple sub-pages (Matt West).
+
+  * Change log level of external grading jobs to reduce syslog volume (Matt West).
+  * Change test cases to use templated DB for faster performance (Dave Mussulman).
+
+  * Remove `element_index` from list of arguments passed to elements (Tim Bretl).
+
+* __3.0.0__ - 2018-05-23
+
+  * Add improved support for very large file downloads (Nathan Walters).
+
+  * Add support for running in production inside Docker (Matt West).
+
+  * Add configurable authentication sources menu (Dave Mussulman).
+
+  * Add locking to enable multi-server deployments (Matt West).
+
+  * Add per-assessment PrairieSchedule exam linking (Matt West).
+
+  * Add "Report cheating" page in Exam mode (Matt West).
+
+  * Add `package-lock.json` to Docker image build (Matt West).
+
+  * Add additional information about indices to database descriptions (Nathan Walters).
+
+  * Add configurable `homeUrl` to support container deployments (Matt West).
+
+  * Add caching of rendered question panels (Nathan Walters).
+
+  * Fix migration 111 to allow re-running (Matt West).
+
+  * Fix docs to provide workaround for `mcrypt` install error on OSX (Tim Bretl).
+
+  * Change `popper.js` to version `1.14.0` (Tim Bretl).
+
+* __2.12.0__ - 2018-05-19
 
   * Add new issues page style and flexible filtering (Nathan Walters).
 
@@ -46,6 +290,58 @@
   * Add `tools/` to Docker image (Matt West).
 
   * Add docs for generating LaTeX label images with Docker (Matt West).
+
+  * Add option to enable networking access on external grading containers (Nathan Walters).
+
+  * Add `sympy.ImmutableMatrix` to list of types accepted by `prairielearn.to_json()` (Tim Bretl).
+
+  * Add form help text indicating multiple answer can be selected for `pl_checkbox` (James Balamuta).
+
+  * Add demo question showcasing all options for `pl_checkbox` (James Balamuta).
+
+  * Add example of how to use PL to learn student names (Tim Bretl).
+
+  * Add exception handling to python caller to display what can't be converted to valid JSON (Tim Bretl).
+
+  * Add tags list to question stats CSV (Matt West).
+
+  * Add Redis to support websockets when running with multiple servers (Nathan Walters).
+
+  * Add support for dtype in `pl.to_json` and `pl.from_json` (Tim Bretl).
+
+  * Add better grading-instance autoscaling calculations (Matt West).
+
+  * Add student page view tracking (Matt West).
+
+  * Add predictive grader autoscaling (Matt West).
+
+  * Add links to student questions on instructor assessment instance page (Matt West).
+
+  * Add Safe Exam Browser support (Dave Mussulman).
+
+  * Add instance question durations to CSV output (Matt West).
+
+  * Add load-testing script (Matt West).
+
+  * Add documentation for the `shuffleQuestions` option (Matt West).
+
+  * Add course instance id to all question variants (Nathan Walters).
+
+  * Add docs for external grading statistics (Matt West).
+
+  * Add ability to restore original file in `pl_file_editor` (Nathan Walters).
+
+  * Add `pl_integer_input` element (Tim Bretl).
+
+  * Add consistency checks for `course_instance_id` in `variants` (Matt West).
+
+  * Add `merge=union` strategy for `ChangeLog.md` (Matt West).
+
+  * Add developer docs about question rendering (Matt West).
+
+  * Add submission info modal with external grading stats (Nathan Walters).
+
+  * Add `load-test` support for v2 questions (Matt West).
 
   * Fix broken file upload element (Nathan Walters).
 
@@ -87,6 +383,34 @@
 
   * Fix Coveralls.io reporting (Dave Mussulman).
 
+  * Fix tag order display (Dave Mussulman, h/t Pengyu Cheng).
+
+  * Fix navbar role switching button text (Dave Mussulman).
+
+  * Fix all calls of `json.dumps` to make them produce valid JSON (Tim Bretl).
+
+  * Fix error when rendering question score panel (Nathan Walters).
+
+  * Fix questions without tags not displaying on instructor assessment page (Jake Bailey).
+
+  * Fix daily external grader statistics to split out receive time (Matt West).
+
+  * Fix crash in `pl_external_grader_results` caused by malformed results (Nathan Walters).
+
+  * Fix question order on instructor assessment instance page (Matt West).
+
+  * Fix bug in display of input element tolerances (Tim Bretl).
+
+  * Fix `variants.course_instance_id` migration (Matt West).
+
+  * Fix typo in `exampleCourse/questions/positionTimeGraph` (Matt West).
+
+  * Fix 'Load from disk' works when emulating non-instructor roles (Dave Mussulman).
+
+  * Fix slow query for file downloads (Matt West).
+
+  * Fix external grading documentation to describe the current code (Nathan Walters).
+
   * Change to Bootstrap 4 (Nathan Walters).
 
   * Change to NodeJS 8.x LTS (Matt West).
@@ -113,9 +437,25 @@
 
   * Change to Python 3.6 in `centos7-base` grader image (Matt West).
 
-  * Remove HackIllinois advertisement (Matt West).
+  * Change `pl_checkbox` to display form help text by default (James Balamuta).
 
-  * Add option to enable networking access on external grading containers (Nathan Walters).
+  * Change authenication redirects to preserve originally visited URL (Dave Mussulman).
+
+  * Change Docker postgresql to do initializations/migrations at build (Dave Mussulman).
+
+  * Change the example course to be available to any institution (Matt West).
+
+  * Change `centos7-plbase` docker image to not use `/PrairieLearn` directory (Matt West).
+
+  * Change shared code to be in external PrairieLib library (Nathan Walters).
+
+  * Change instructor issues page to show student message on new line; remove `is:automatically-reported` filter (Nathan Walters).
+
+  * Change CSRF codes to be URL-safe (Dave Mussulman).
+
+  * Change closed exams to not be reviewable for students (Dave Mussulman).
+
+  * Remove HackIllinois advertisement (Matt West).
 
 * __2.11.0__ - 2017-12-29
 

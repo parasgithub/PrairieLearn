@@ -5,8 +5,8 @@ var request = require('request');
 var cheerio = require('cheerio');
 
 var config = require('../lib/config');
-var sqldb = require('../lib/sqldb');
-var sqlLoader = require('../lib/sql-loader');
+var sqldb = require('@prairielearn/prairielib/sql-db');
+var sqlLoader = require('@prairielearn/prairielib/sql-loader');
 var sql = sqlLoader.loadSqlEquiv(__filename);
 
 var helperServer = require('./helperServer');
@@ -14,7 +14,6 @@ var helperQuestion = require('./helperQuestion');
 
 const locals = {};
 
-// sorted alphabetically by qid
 const questionsArray = [
     {qid: 'addNumbers', type: 'Freeform', maxPoints: 5},
     {qid: 'addVectors', type: 'Calculation', maxPoints: 11},
@@ -26,11 +25,12 @@ const questionsArray = [
     {qid: 'partialCredit4_v2', type: 'Calculation', maxPoints: 13},
     {qid: 'partialCredit5_v2_partial', type: 'Calculation', maxPoints: 12},
     {qid: 'partialCredit6_no_partial', type: 'Freeform', maxPoints: 8},
+    {qid: 'brokenGrading', type: 'Freeform', maxPoints: 4},
 ];
 
 const questions = _.keyBy(questionsArray, 'qid');
 
-const assessmentMaxPoints = 104;
+const assessmentMaxPoints = 108;
 
 // each outer entry is a whole exam session
 // each inner entry is a list of question submissions

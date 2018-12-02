@@ -34,7 +34,7 @@
         "allowIssueReporting": {
             "description": "Whether to allow students to report issues for assessment questions",
             "type": "boolean",
-            "default": false
+            "default": true
         },
         "multipleInstance": {
             "description": "Whether to allow students to create additional instances of the assessment",
@@ -42,7 +42,7 @@
             "default": false
         },
         "shuffleQuestions": {
-            "description": "Whether the questions will be shuffled in the student",
+            "description": "Whether the questions will be shuffled in the student view of an assessment (Homework only)",
             "type": "boolean",
             "default": false
         },
@@ -79,10 +79,16 @@
         "accessRule": {
             "description": "An access rule that permits people to access this assessment. All restrictions in the rule must be satisfied for the rule to allow access.",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "mode" : {
                     "description": "The server mode required for access.",
-                    "enum": ["Public", "Exam"]
+                    "enum": ["Public", "Exam", "SEB"]
+                },
+                "examUuid": {
+                    "description": "The scheduler exam UUID for which a student must be registered.",
+                    "type": "string",
+                    "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
                 },
                 "role" : {
                     "description": "The minimum user role required for access.",
@@ -116,6 +122,26 @@
                 "password": {
                     "description": "Password to begin the assessment (only for Exams).",
                     "type": "string"
+                },
+                "SEBConfig": {
+                    "description": "Configuration related to Safe Exam Browser",
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "description": "Password protect the SEB exam and config file",
+                            "type": "string"
+                        },
+                        "quitPassword": {
+                            "description": "If set, requires password to quit SEB other than visiting the quitURL page",
+                            "type": "string"
+                        },
+                        "allowPrograms": {
+                            "description": "Keyword array for allowed programs in SEB",
+                            "type": "array",
+                            "minItems": 0,
+                            "items": {"type": "string"}
+                        }
+                    }
                 }
             }
         },
@@ -126,11 +152,19 @@
                     "description": "Zone title, displayed to the students at the top of the question list for the zone.",
                     "type": "string"
                 },
+                "maxPoints": {
+                    "description": "Only this many of the points that are awarded for answering questions in this zone will count toward the total points.",
+                    "type": "number"
+                },
                 "numberChoose": {
                     "description": "Number of questions to choose from this zone.",
                     "type": "integer",
-                    "minimum": 0,
-                    "default": 1
+                    "minimum": 0
+                },
+                "bestQuestions": {
+                    "description": "Only this many of the questions in this zone, with the highest number of awarded points, will count toward the total points.",
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "questions": {
                     "description": "Array of questions in the zone.",

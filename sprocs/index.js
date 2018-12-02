@@ -1,14 +1,32 @@
-var ERR = require('async-stacktrace');
-var fs = require('fs');
-var path = require('path');
-var async = require('async');
+const ERR = require('async-stacktrace');
+const fs = require('fs');
+const path = require('path');
+const async = require('async');
 
-var error = require('../lib/error');
-var logger = require('../lib/logger');
-var sqldb = require('../lib/sqldb');
+const namedLocks = require('../lib/named-locks');
+const error = require('@prairielearn/prairielib/error');
+const logger = require('../lib/logger');
+const sqldb = require('@prairielearn/prairielib/sql-db');
 
 module.exports = {
-    init: function(callback) {
+    init(callback) {
+        const lockName = 'sprocs';
+        logger.verbose(`Waiting for lock ${lockName}`);
+        namedLocks.waitLock(lockName, (err, lock) => {
+            if (ERR(err, callback)) return;
+            logger.verbose(`Acquired lock ${lockName}`);
+            this._initWithLock((err) => {
+                namedLocks.releaseLock(lock, (lockErr) => {
+                    if (ERR(lockErr, callback)) return;
+                    if (ERR(err, callback)) return;
+                    logger.verbose(`Released lock ${lockName}`);
+                    callback(null);
+                });
+            });
+        });
+    },
+
+    _initWithLock(callback) {
         logger.verbose('Starting DB stored procedure initialization');
         async.eachSeries([
             'array_dot.sql',
@@ -42,10 +60,8 @@ module.exports = {
             'assessments_format.sql',
             'assessments_format_for_question.sql',
             'tags_for_question.sql',
-            'assessment_instances_points.sql',
             'random_unique.sql',
             'question_order.sql',
-            'exam_question_status.sql',
             'authz_assessment.sql',
             'authz_assessment_instance.sql',
             'select_assessment_questions.sql',
@@ -99,6 +115,7 @@ module.exports = {
             'ip_to_mode.sql',
             'config_select.sql',
             'users_select_or_insert.sql',
+            'users_select_or_insert_lti.sql',
             'dump_to_csv.sql',
             'grading_jobs_stats_day.sql',
             'issues_insert_for_variant.sql',
@@ -118,6 +135,7 @@ module.exports = {
             'grader_loads_current.sql',
             'server_loads_current.sql',
             'array_agg_custom.sql',
+            'server_usage_current.sql',
             'assessment_questions_calculate_stats_for_assessment.sql',
             'assessment_questions_calculate_stats.sql',
             'instance_questions_calculate_stats.sql',
@@ -143,6 +161,9 @@ module.exports = {
             'calculate_predicted_question_sd.sql',
             'assessments_calculate_generated_assessment_stats.sql',
             'select_balanced_assessment_questions.sql',
+            'access_tokens_insert.sql',
+            'access_tokens_delete.sql',
+            'assessment_instances_points.sql',
         ], function(filename, callback) {
             logger.verbose('Loading ' + filename);
             fs.readFile(path.join(__dirname, filename), 'utf8', function(err, sql) {

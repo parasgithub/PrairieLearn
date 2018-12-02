@@ -1,16 +1,20 @@
-<pl_question_panel>
-
-<pl_code language="python">
+<pl-question-panel>
+<pl-code language="python">
 def square(x):
     return x * x
-</pl_code>
+</pl-code>
 
-<p> How many arguments does the function <code>square()</code> take?
+<pl-code language="python" prevent-select="true">
+# Here's a version that's had selection, right-clicking, etc. disabled
+def square(x):
+    return x * x
+</pl-code>
 
-</pl_question_panel>
-  
-<pl_multiple_choice answers_name="count" fixed_order="true">
-  <pl_answer correct="false">0</pl_answer>
-  <pl_answer correct="true">1</pl_answer>
-  <pl_answer correct="false">2</pl_answer>
-</pl_multiple_choice>
+<p>How many arguments does the function <code>square()</code> take?</p>
+</pl-question-panel>
+
+<pl-multiple-choice answers-name="count" fixed-order="true">
+  <pl-answer correct="false">0</pl-answer>
+  <pl-answer correct="true">1</pl-answer>
+  <pl-answer correct="false">2</pl-answer>
+</pl-multiple-choice>

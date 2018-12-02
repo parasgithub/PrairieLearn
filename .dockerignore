@@ -4,6 +4,7 @@
 # whitelist things to copy
 !.eslintignore
 !.eslintrc.json
+!api/
 !cron/
 !database/
 !doc/
@@ -15,6 +16,7 @@
 !migrations/
 !models/
 !package.json
+!package-lock.json
 !pages/
 !public/
 !question-servers/

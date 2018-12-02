@@ -4,10 +4,10 @@ var async = require('async');
 var naturalSort = require('javascript-natural-sort');
 
 var logger = require('../../lib/logger');
-var error = require('../../lib/error');
-var sqldb = require('../../lib/sqldb');
+var error = require('@prairielearn/prairielib/error');
+var sqldb = require('@prairielearn/prairielib/sql-db');
 var config = require('../../lib/config');
-var sqlLoader = require('../../lib/sql-loader');
+var sqlLoader = require('@prairielearn/prairielib/sql-loader');
 
 var sql = sqlLoader.loadSqlEquiv(__filename);
 
@@ -52,9 +52,8 @@ module.exports = {
             function(callback) {
                 async.forEachOfSeries(courseInstance.assessmentDB, function(dbAssessment, tid, callback) {
                     logger.debug('Syncing ' + tid);
-                    // issue reporting defaults to false, then to the courseInstance setting, then to the assessment setting
-                    var allow_issue_reporting = false;
-                    if (_.has(courseInstance, 'allowIssueReporting')) allow_issue_reporting = !!courseInstance.allowIssueReporting;
+                    // issue reporting defaults to true, then to the courseInstance setting, then to the assessment setting
+                    var allow_issue_reporting = true;
                     if (_.has(dbAssessment, 'allowIssueReporting')) allow_issue_reporting = !!dbAssessment.allowIssueReporting;
                     var params = {
                         tid: tid,
@@ -138,25 +137,52 @@ module.exports = {
         });
     },
 
+    ensurePSExamIfNeeded: function(dbRule, dbAssessment, callback) {
+        if (!_(dbRule).has('examUuid')) {
+            return callback(null);
+        }
+
+        if (config.checkAccessRulesExamUuid) {
+            const params = {
+                exam_uuid: dbRule.examUuid,
+            };
+            sqldb.query(sql.select_exams_by_uuid, params, function(err, result) {
+                if (ERR(err, callback)) return;
+                if (result.rowCount == 0) {
+                    return callback(new Error(`Assessment ${dbAssessment.tid} allowAccess: No such examUuid ${dbRule.examUuid} found in database. Double-check the scheduler to ensure you copied the correct thing?`));
+                }
+                callback(null);
+            });
+        } else {
+            callback(null);
+        }
+    },
+
     syncAccessRules: function(assessmentId, dbAssessment, callback) {
+        var that = module.exports;
         var allowAccess = dbAssessment.allowAccess || [];
         async.forEachOfSeries(allowAccess, function(dbRule, i, callback) {
             logger.debug('Syncing assessment access rule number ' + (i + 1));
-            var params = {
-                assessment_id: assessmentId,
-                number: i + 1,
-                mode: _(dbRule).has('mode') ? dbRule.mode : null,
-                role: _(dbRule).has('role') ? dbRule.role : null,
-                uids: _(dbRule).has('uids') ? dbRule.uids : null,
-                start_date: _(dbRule).has('startDate') ? dbRule.startDate : null,
-                end_date: _(dbRule).has('endDate') ? dbRule.endDate : null,
-                credit: _(dbRule).has('credit') ? dbRule.credit : null,
-                time_limit_min: _(dbRule).has('timeLimitMin') ? dbRule.timeLimitMin : null,
-                password: _(dbRule).has('password') ? dbRule.password : null,
-            };
-            sqldb.query(sql.insert_assessment_access_rule, params, function(err, _result) {
+            that.ensurePSExamIfNeeded(dbRule, dbAssessment, function(err) {
                 if (ERR(err, callback)) return;
-                callback(null);
+                var params = {
+                    assessment_id: assessmentId,
+                    number: i + 1,
+                    mode: _(dbRule).has('mode') ? dbRule.mode : null,
+                    role: _(dbRule).has('role') ? dbRule.role : null,
+                    uids: _(dbRule).has('uids') ? dbRule.uids : null,
+                    start_date: _(dbRule).has('startDate') ? dbRule.startDate : null,
+                    end_date: _(dbRule).has('endDate') ? dbRule.endDate : null,
+                    credit: _(dbRule).has('credit') ? dbRule.credit : null,
+                    time_limit_min: _(dbRule).has('timeLimitMin') ? dbRule.timeLimitMin : null,
+                    password: _(dbRule).has('password') ? dbRule.password : null,
+                    seb_config: _(dbRule).has('SEBConfig') ? dbRule.SEBConfig : null,
+                    exam_uuid: _(dbRule).has('examUuid') ? dbRule.examUuid : null,
+                };
+                sqldb.query(sql.insert_assessment_access_rule, params, function(err, _result) {
+                    if (ERR(err, callback)) return;
+                    callback(null);
+                });
             });
         }, function(err) {
             if (ERR(err, callback)) return;
@@ -182,6 +208,8 @@ module.exports = {
                 number: i + 1,
                 title: dbZone.title,
                 number_choose: dbZone.numberChoose,
+                max_points: dbZone.maxPoints,
+                best_questions: dbZone.bestQuestions,
             };
             sqldb.queryOneRow(sql.insert_zone, params, function(err, result) {
                 if (ERR(err, callback)) return;

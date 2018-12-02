@@ -4,9 +4,10 @@ var router = express.Router();
 
 var config = require('../../lib/config');
 var csrf = require('../../lib/csrf');
-var sqldb = require('../../lib/sqldb');
+var sqldb = require('@prairielearn/prairielib/sql-db');
 
 router.get('/:action?/:target(*)?', function(req, res, next) {
+    if (!config.hasShib) return next(new Error('Illinois Shibboleth login is not enabled'));
     var authUid = null;
     var authName = null;
     var authUin = null;
@@ -32,7 +33,12 @@ router.get('/:action?/:target(*)?', function(req, res, next) {
         var pl_authn = csrf.generateToken(tokenData, config.secretKey);
         res.cookie('pl_authn', pl_authn, {maxAge: 24 * 60 * 60 * 1000});
         if (req.params.action == 'redirect') return res.redirect('/' + req.params.target);
-        res.redirect(res.locals.plainUrlPrefix);
+        var redirUrl = res.locals.homeUrl;
+        if ('preAuthUrl' in req.cookies) {
+            redirUrl = req.cookies.preAuthUrl;
+            res.clearCookie('preAuthUrl');
+        }
+        res.redirect(redirUrl);
     });
 });
 

@@ -1,24 +1,26 @@
-var ERR = require('async-stacktrace');
-var _ = require('lodash');
-var express = require('express');
-var router = express.Router();
-var csvStringify = require('csv').stringify;
+const ERR = require('async-stacktrace');
+const _ = require('lodash');
+const express = require('express');
+const router = express.Router();
+const csvStringify = require('csv').stringify;
 
-var async = require('async');
-var error = require('../../lib/error');
-var question = require('../../lib/question');
-var sqldb = require('../../lib/sqldb');
-var sqlLoader = require('../../lib/sql-loader');
-var debug = require('debug')('prairielearn:instructorQuestion');
+const async = require('async');
+const error = require('@prairielearn/prairielib/error');
+const question = require('../../lib/question');
+const sqldb = require('@prairielearn/prairielib/sql-db');
+const sqlLoader = require('@prairielearn/prairielib/sql-loader');
+const debug = require('debug')('prairielearn:instructorQuestion');
 
-var sql = sqlLoader.loadSqlEquiv(__filename);
+const logPageView = require('../../middlewares/logPageView')('instructorQuestion');
 
-var sanitizeName = function(name) {
+const sql = sqlLoader.loadSqlEquiv(__filename);
+
+const sanitizeName = function(name) {
     return name.replace(/[^a-zA-Z0-9]/g, '_');
 };
 
-var filenames = function(locals) {
-    var prefix = sanitizeName(locals.course.short_name)
+const filenames = function(locals) {
+    const prefix = sanitizeName(locals.course.short_name)
         + '_'
         + sanitizeName(locals.course_instance.short_name)
         + '_'
@@ -107,14 +109,14 @@ router.post('/', function(req, res, next) {
     } else if (req.body.__action == 'test_once') {
         const count = 1;
         const showDetails = true;
-        question.startTestQuestion(count, showDetails, res.locals.question, res.locals.course, res.locals.authn_user.user_id, (err, job_sequence_id) => {
+        question.startTestQuestion(count, showDetails, res.locals.question, res.locals.course_instance, res.locals.course, res.locals.authn_user.user_id, (err, job_sequence_id) => {
             if (ERR(err, next)) return;
             res.redirect(res.locals.urlPrefix + '/jobSequence/' + job_sequence_id);
         });
     } else if (req.body.__action == 'test_100') {
         const count = 100;
         const showDetails = false;
-        question.startTestQuestion(count, showDetails, res.locals.question, res.locals.course, res.locals.authn_user.user_id, (err, job_sequence_id) => {
+        question.startTestQuestion(count, showDetails, res.locals.question, res.locals.course_instance, res.locals.course, res.locals.authn_user.user_id, (err, job_sequence_id) => {
             if (ERR(err, next)) return;
             res.redirect(res.locals.urlPrefix + '/jobSequence/' + job_sequence_id);
         });
@@ -189,17 +191,20 @@ router.get('/', function(req, res, next) {
             });
         },
         (callback) => {
+            logPageView(req, res, (err) => {
+                if (ERR(err, next)) return;
+                callback(null);
+            });
+        },
+        (callback) => {
             res.locals.questionGHLink = null;
             if (res.locals.course.repository) {
                 const GHfound = res.locals.course.repository.match(/^git@github.com:\/?(.+?)(\.git)?\/?$/);
                 if (GHfound) {
-                    if (GHfound[1] == 'PrairieLearn/PrairieLearn') {
-                        // this is exampleCourse, so handle it specially
-                        res.locals.questionGHLink = 'https://github.com/' + GHfound[1] + '/tree/master/exampleCourse/questions/' + res.locals.question.qid;
-                    } else {
-                        res.locals.questionGHLink = 'https://github.com/' + GHfound[1] + '/tree/master/questions/' + res.locals.question.qid;
-                    }
+                    res.locals.questionGHLink = 'https://github.com/' + GHfound[1] + '/tree/master/questions/' + res.locals.question.qid;
                 }
+            } else if (res.locals.course.options.isExampleCourse) {
+                res.locals.questionGHLink = `https://github.com/PrairieLearn/PrairieLearn/tree/master/exampleCourse/questions/${res.locals.question.qid}`;
             }
             callback(null);
         },

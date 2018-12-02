@@ -2,13 +2,16 @@ var ERR = require('async-stacktrace');
 var express = require('express');
 var router = express.Router();
 
-var error = require('../../lib/error');
-var sqldb = require('../../lib/sqldb');
-var sqlLoader = require('../../lib/sql-loader');
+var error = require('@prairielearn/prairielib/error');
+var sqldb = require('@prairielearn/prairielib/sql-db');
+var sqlLoader = require('@prairielearn/prairielib/sql-loader');
 
 var sql = sqlLoader.loadSqlEquiv(__filename);
 
 router.get('/', function(req, res, next) {
+    if (res.locals.authn_user.provider == 'lti') {
+        return next(error.make(400, 'Enrollment unavailable, managed via LTI'));
+    }
     var params = {
         user_id: res.locals.authn_user.user_id,
         req_date: res.locals.req_date,
@@ -16,12 +19,14 @@ router.get('/', function(req, res, next) {
     sqldb.query(sql.select_course_instances, params, function(err, result) {
         if (ERR(err, next)) return;
         res.locals.course_instances = result.rows;
-
         res.render(__filename.replace(/\.js$/, '.ejs'), res.locals);
     });
 });
 
 router.post('/', function(req, res, next) {
+    if (res.locals.authn_user.provider == 'lti') {
+        return next(error.make(400, 'Enrollment unavailable, managed via LTI'));
+    }
     if (req.body.__action == 'enroll') {
         var params = {
             course_instance_id: req.body.course_instance_id,

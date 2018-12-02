@@ -14,15 +14,15 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
+          <h4 class="modal-title">All done?</h4>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Finish assessment</h4>
         </div>
         <div class="modal-body">
           <% if (assessment_instance.all_questions_answered) { %>
           <div class="alert alert-warning">There are still unanswered questions.</div>
           <% } %>
           <p><strong>Warning</strong>: You will not be able to answer any more questions after finishing the assessment.</p>
-          <p>Are you sure you want to finish the assessment?</p>
+          <p>Are you sure you want to finish, complete, and close out the assessment?</p>
         </div>
         <div class="modal-footer">
           <form name="finish-form" method="POST">
@@ -74,23 +74,24 @@
           <div class="col-md-3 col-sm-6">
             <%- include('../partials/scorebar', {score: assessment_instance.score_perc}) %>
           </div>
-          <div class="col-md-6 col-sm-12 text-right">
+          <div class="col-md-6 col-sm-12">
               <% if (assessment_instance.open) { %>
-              Assessment is <strong>open</strong> and you can answer questions
+                  Assessment is <strong>open</strong> and you can answer questions.
+                  <p>
+                  Available credit: <%= authz_result.credit_date_string %>
+                  <%- include('../partials/studentAccessRulesPopover', {
+                    accessRules: authz_result.access_rules,
+                    assessmentSetName: assessment_set.name,
+                    assessmentNumber: assessment.number,
+                  }); %>
               <% } else { %>
-              Assessment is <strong>closed</strong> and you cannot answer questions
+                  Assessment is <strong>closed</strong> and you cannot answer questions.
               <% } %>
           </div>
         </div>
 
-        <% if (assessment_text_templated) { %>
-        <div class="alert alert-secondary mb-0 mt-4">
-          <%- assessment_text_templated %>
-        </div>
-        <% } %>
-
         <% if (assessment_instance.open && assessment_instance_remaining_ms) { %>
-        <div class="well well-sm">
+        <div class="alert alert-secondary mt-4" role="alert">
           <div class="row">
             <div class="col-md-2 col-sm-12 col-xs-12">
               <div id="countdownProgress"></div>
@@ -107,6 +108,13 @@
           }) %>
         </div>
         <% } %>
+
+        <% if (assessment_text_templated) { %>
+        <div class="alert alert-secondary mb-0 mt-4">
+          <%- assessment_text_templated %>
+        </div>
+        <% } %>
+
       </div>
 
       <table class="table table-sm table-hover">
@@ -131,7 +139,21 @@
         <% instance_questions.forEach(function(instance_question) { %>
           <% if (instance_question.start_new_zone && instance_question.zone_title) { %>
           <tr>
-            <th colspan="5"><%= instance_question.zone_title %></th>
+            <th colspan="5">
+              <%= instance_question.zone_title %>
+              <% if (instance_question.zone_has_max_points) { %>
+               &nbsp;<a tabindex="0" class="btn btn-xs btn-secondary" role="button"
+                  data-toggle="popover" data-trigger="focus" data-container="body"
+                  data-html="true"
+                  data-content="Of the points that you are awarded for answering these questions, at most <%= instance_question.zone_max_points %> will count toward your total points."><span class="badge badge-secondary align-top">maximum <%= instance_question.zone_max_points %> points &nbsp;<i class="far fa-question-circle" aria-hidden="true"></i></span></a>
+              <% } %>
+              <% if (instance_question.zone_has_best_questions) { %>
+               &nbsp;<a tabindex="0" class="btn btn-xs btn-secondary" role="button"
+                  data-toggle="popover" data-trigger="focus" data-container="body"
+                  data-html="true"
+                  data-content="Of these questions, only the <%= instance_question.zone_best_questions %> with the highest number of awarded points will count toward your total points."><span class="badge badge-secondary align-top">best <%= instance_question.zone_best_questions %> questions &nbsp;<i class="far fa-question-circle" aria-hidden="true"></i></span></a>
+              <% } %>
+            </th>
           </tr>
           <% } %>
           <tr>
@@ -149,7 +171,27 @@
       </table>
 
       <div class="card-footer">
-        Submit your answer to each question with the <strong>Grade</strong> button on the question page. Look at <strong>Best submission</strong> to confirm that each question has been graded. When you are done, please logout and close your browser; there is no need to do anything else.
+        <form name="grade-form" method="POST" class="form-inline">
+            <input type="hidden" name="__action" value="grade">
+            <input type="hidden" name="__csrf_token" value="<%= __csrf_token %>">
+            <% if (savedAnswers > 0) { %>
+              <button type="submit" class="btn btn-info">Grade <%= savedAnswers %> saved answer<% if (savedAnswers != 1) { %>s<% } %></button>
+            <% } else { %>
+              <button type="submit" class="btn btn-info disabled" disabled>No saved answers to grade</button>
+            <% } %>
+            </form>
+        <p>
+        <ul>
+            <li>Submit your answer to each question with the <strong>Save & Grade</strong> or <strong>Save only</strong> buttons on the question page.</li>
+            <li>Look at <strong>Best submission</strong> to confirm that each question has been graded. Questions with <strong>Available points</strong> can be attempted again for more points. Attempting questions again will never reduce the points you already have.</li>
+            <% if (authz_result.mode == 'SEB' || authz_result.password != null) { %>
+                <li>After you have answered all the questions completely, click here:
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#confirmFinishModal">Finish assessment</button>
+                </li>
+            <% } else { %>
+                <li>When you are done, please logout and close your browser; there is no need to do anything else. If you have any saved answers when you leave, they will be automatically graded before your final score is computed.</li>
+            <% } %>
+        </ul>
       </div>
     </div>
   </div>

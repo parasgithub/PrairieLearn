@@ -5,10 +5,11 @@ var router = express.Router();
 
 var config = require('../../lib/config');
 var csrf = require('../../lib/csrf');
-var sqldb = require('../../lib/sqldb');
+var sqldb = require('@prairielearn/prairielib/sql-db');
 
 // FIXME: do we need "all" below for both "get" and "post", or just one of them?
 router.all('/', function(req, res, next) {
+    if (!config.hasAzure) return next(new Error('Microsoft login is not enabled'));
     const authData = {
         response: res,
         failureRedirect: '/pl',
@@ -31,7 +32,12 @@ router.all('/', function(req, res, next) {
             };
             var pl_authn = csrf.generateToken(tokenData, config.secretKey);
             res.cookie('pl_authn', pl_authn, {maxAge: 24 * 60 * 60 * 1000});
-            res.redirect(res.locals.plainUrlPrefix);
+            var redirUrl = res.locals.homeUrl;
+            if ('preAuthUrl' in req.cookies) {
+                redirUrl = req.cookies.preAuthUrl;
+                res.clearCookie('preAuthUrl');
+            }
+            res.redirect(redirUrl);
         });
     })(req, res, next);
 });
