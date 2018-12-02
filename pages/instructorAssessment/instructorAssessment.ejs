@@ -230,6 +230,76 @@
       <!-- ###################################################################### -->
       <!-- ###################################################################### -->
 
+
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          Num sds cutoff parameter value
+        </div>
+        <div class="card-body">
+          Num-sds =
+          <% if (assessment.num_sds) { %>
+            <%= assessment.num_sds %> SDs
+          <% } else { %>
+            not set
+          <% } %>
+        </div>
+      </div>
+
+      <!-- ###################################################################### -->
+      <!-- ###################################################################### -->
+
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          Generated assessment statistics
+          <div class="ml-auto">
+            <small><span class="text-light mr-2">Last calculated: <%= generated_assessment_stats_last_updated %></span></small>
+            <a class="btn btn-sm btn-light" role="button" tabindex="0"
+               data-toggle="modal" data-target="#refreshGeneratedAssessmentStatsModal">
+              <i class="fa fa-sync" aria-hidden="true"></i> Recalculate generated assessment statistics
+            </a>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+              <tr>
+                <th>Quintile</th>
+                <th>Mean</th>
+                <th>SD</th>
+              </tr>
+              </thead>
+              <tbody>
+              <% [1,2,3,4,5].forEach(function(quintile) { %>
+                <% const row = generated_assessment_statistics.filter(row => row.quintile == quintile)[0] %>
+                <tr>
+                  <td><%= quintile %></td>
+                  <td>
+                    <% if (row) { %>
+                      <%= (parseFloat(row.mean_score) * 100).toFixed(2) %> %
+                    <% } else { %>
+                      --
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (row) { %>
+                      <%= (parseFloat(row.score_sd) * 100).toFixed(3) %> %
+                    <% } else { %>
+                      --
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ###################################################################### -->
+      <!-- ###################################################################### -->
+
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">
           <%= assessment_set.name %> <%= assessment.number %>: Score statistics
@@ -625,6 +695,34 @@
 
       <!-- ###################################################################### -->
       <!-- ###################################################################### -->
+
+      <div class="modal fade" id="refreshGeneratedAssessmentStatsModal" tabindex="-1" role="dialog" aria-labelledby="refreshGeneratedAssessmentStatsModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title" id="refreshAssessmentQuestionStatsModalLabel">
+                Refresh generated assessment statistics
+              </h4>
+            </div>
+            <div class="modal-body">
+              Are you sure you want to refresh all generated assessment statistics for
+              <strong>
+                  <%= assessment_set.name %><%= assessment.number %>
+              </strong>
+              ? This cannot be undone.
+            </div>
+            <div class="modal-footer">
+              <form name="refresh-stats-form" method="POST">
+                <input type="hidden" name="__action" value="refresh_generated_assessment_stats">
+                <input type="hidden" name="__csrf_token" value="<%= __csrf_token %>">
+                <input type="hidden" name="assessment_id" value="<%= assessment.id %>">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="modal fade" id="refreshAssessmentQuestionStatsModal" tabindex="-1"
            role="dialog" aria-labelledby="refreshStatsAssessmentInstances">

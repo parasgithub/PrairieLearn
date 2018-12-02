@@ -18,7 +18,8 @@ generated_assessments AS (
         filter_generated_assessment(generated_aq_ids, quintile_stats.means, quintile_stats.sds, 'Exams', $num_sds, 0) AS keep
     FROM
         quintile_stats
-        CROSS JOIN get_generated_aq_ids_multiple_reps_as_rows($assessment_id, 1000) AS generated_aq_ids
+--         CROSS JOIN get_generated_aq_ids_multiple_reps_as_rows($assessment_id, 1000) AS generated_aq_ids
+        CROSS JOIN get_generated_aq_ids_multiple_reps_as_rows($assessment_id, 50) AS generated_aq_ids
 ),
 num_exams_kept AS (
     SELECT
@@ -71,3 +72,11 @@ FROM
     JOIN sd_values ON TRUE
     JOIN sd_improvement ON TRUE
     JOIN quintile_stats ON TRUE
+
+-- BLOCK update_num_sds_value
+UPDATE
+    assessments AS a
+SET
+    num_sds = $num_sds_value
+WHERE
+    a.id=$assessment_id;

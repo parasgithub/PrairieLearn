@@ -43,6 +43,6 @@ BEGIN
 
     predicted_score = predicted_score_perc / 100;
 
-    RETURN predicted_score / max_points;
+    RETURN predicted_score * max_points;
 END
 $$ LANGUAGE plpgsql;

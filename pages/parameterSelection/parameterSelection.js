@@ -19,6 +19,10 @@ router.get('/', function(req, res, next) {
                 num_buckets: 30,
             };
 
+            if (res.locals.assessment.num_sds) {
+                params.num_sds = res.locals.assessment.num_sds;
+            }
+
             if (req.query.num_sds) {
                 params.num_sds = req.query.num_sds;
             }
@@ -51,5 +55,25 @@ router.get('/', function(req, res, next) {
         debug('render page');
         res.render(__filename.replace(/\.js$/, '.ejs'), res.locals);
     });
+});
+
+router.post('/', function(req, res, next) {
+    if (!res.locals.authz_data.has_instructor_edit) return next();
+    if (req.body.__action === 'update_num_sds_value') {
+        let params = {
+            assessment_id: res.locals.assessment.id,
+            num_sds_value: req.body.num_sds,
+        };
+        sqldb.queryOneRow(sql.update_num_sds_value, params, function(err, _result) {
+            if (ERR(err, next)) return;
+            if (req.originalUrl.indexOf('?') === -1) {
+                res.redirect(req.originalUrl);
+            } else {
+                res.redirect(req.originalUrl.substring(0, req.originalUrl.indexOf('?')));
+            }
+        });
+    } else {
+        return next(error.make(400, 'unknown __action', {locals: res.locals, body: req.body}));
+    }
 });
 module.exports = router;

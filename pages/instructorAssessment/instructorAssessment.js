@@ -78,7 +78,6 @@ router.get('/', function(req, res, next) {
             sqldb.query(sql.expected_quintile_assessment_scores, params, function(err, result) {
                 if (ERR(err, callback)) return;
                 res.locals.expected_assessment_quintile_score_perc = result.rows;
-                // console.log(result.rows);
                 callback(null);
             });
         },
@@ -102,7 +101,6 @@ router.get('/', function(req, res, next) {
             sqldb.query(sql.questions, params, function(err, result) {
                 if (ERR(err, callback)) return;
                 res.locals.questions = result.rows;
-                console.log(res.locals.questions);
                 callback(null);
             });
         },
@@ -169,6 +167,25 @@ router.get('/', function(req, res, next) {
             sqldb.query(sql.select_assessment_instances, params, function(err, result) {
                 if (ERR(err, callback)) return;
                 res.locals.user_scores = result.rows;
+                callback(null);
+            });
+        },
+        function(callback) {
+            debug('query generated_assessment_statistics');
+            const params = {assessment_id: res.locals.assessment.id};
+            sqldb.query(sql.generated_assessment_statistics, params, function(err, result) {
+                if (ERR(err, callback)) return;
+                res.locals.generated_assessment_statistics = result.rows;
+                console.log(res.locals.generated_assessment_statistics);
+                callback(null);
+            });
+        },
+        function(callback) {
+            debug('query generated_assessment_stats_last_updated');
+            const params = {assessment_id: res.locals.assessment.id};
+            sqldb.queryOneRow(sql.generated_assessment_stats_last_updated, params, function(err, result) {
+                if (ERR(err, callback)) return;
+                res.locals.generated_assessment_stats_last_updated = result.rows[0].generated_assessment_stats_last_updated;
                 callback(null);
             });
         },
@@ -774,13 +791,21 @@ router.post('/', function(req, res, next) {
             if (ERR(err, next)) return;
             res.redirect(res.locals.urlPrefix + '/jobSequence/' + job_sequence_id);
         });
-    } else if (req.body.__action == 'refresh_stats') {
-        var params = [
+    } else if (req.body.__action === 'refresh_stats') {
+        let params = [
             req.body.assessment_id,
         ];
         sqldb.call('assessment_questions_calculate_stats_for_assessment', params, function(err) {
           if (ERR(err, next)) return;
           res.redirect(req.originalUrl);
+        });
+    } else if (req.body.__action === 'refresh_generated_assessment_stats') {
+        let params = [
+            req.body.assessment_id,
+        ];
+        sqldb.call('assessments_calculate_generated_assessment_stats', params, function(err) {
+            if (ERR(err, next)) return;
+            res.redirect(req.originalUrl);
         });
     } else {
         return next(error.make(400, 'unknown __action', {locals: res.locals, body: req.body}));

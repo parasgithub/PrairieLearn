@@ -663,4 +663,24 @@ FROM
     assessments AS a
     JOIN course_instances AS ci ON (ci.id = a.course_instance_id)
 WHERE
-    a.id = $assessment_id
+    a.id = $assessment_id;
+
+-- BLOCK generated_assessment_statistics
+SELECT
+    assessment_quintile_statistics.*
+FROM
+    assessment_quintile_statistics
+WHERE
+    assessment_quintile_statistics.assessment_id = $assessment_id;
+
+-- BLOCK generated_assessment_stats_last_updated
+SELECT
+    CASE
+        WHEN a.generated_assessment_stats_last_updated IS NULL THEN 'never'
+        ELSE format_date_full_compact(a.generated_assessment_stats_last_updated, ci.display_timezone)
+    END AS generated_assessment_stats_last_updated
+FROM
+    assessments AS a
+    JOIN course_instances AS ci ON (ci.id = a.course_instance_id)
+WHERE
+    a.id = $assessment_id;

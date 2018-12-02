@@ -141,6 +141,8 @@ module.exports = {
             'get_total_score.sql',
             'get_quintile_stats.sql',
             'calculate_predicted_question_sd.sql',
+            'assessments_calculate_generated_assessment_stats.sql',
+            'select_balanced_assessment_questions.sql',
         ], function(filename, callback) {
             logger.verbose('Loading ' + filename);
             fs.readFile(path.join(__dirname, filename), 'utf8', function(err, sql) {
