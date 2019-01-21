@@ -254,6 +254,10 @@ app.use('/pl/api/v1', require('./api/v1'));
 //////////////////////////////////////////////////////////////////////
 // Instructor pages //////////////////////////////////////////////////
 
+app.use('/pl/cutoff_algorithm_info', [
+    require('./pages/instructorCutoffAlgorithmInfo/instructorCutoffAlgorithmInfo'),
+]);
+
 app.use('/pl/course_instance/:course_instance_id/instructor/effectiveUser', [
     require('./pages/instructorEffectiveUser/instructorEffectiveUser'),
 ]);
@@ -295,17 +299,9 @@ app.use('/pl/course_instance/:course_instance_id/instructor/assessment/:assessme
 app.use('/pl/course_instance/:course_instance_id/instructor/assessment/:assessment_id/instances', [
     require('./pages/instructorAssessmentInstances/instructorAssessmentInstances'),
 ]);
-app.use('/pl/course_instance/:course_instance_id/instructor/assessment_generator/assessment/:assessment_id', [
-    require('./middlewares/selectAndAuthzAssessment'),
-    require('./pages/shared/assessmentStatDescriptions'),
+app.use('/pl/course_instance/:course_instance_id/instructor/assessment/:assessment_id/generated_assessment_statistics', [
     require('./pages/shared/floatFormatters'),
-    require('./pages/assessmentGenerator/assessmentGenerator'),
-]);
-app.use('/pl/course_instance/:course_instance_id/instructor/parameter_selection/assessment/:assessment_id', [
-    require('./middlewares/selectAndAuthzAssessment'),
-    require('./pages/shared/assessmentStatDescriptions'),
-    require('./pages/shared/floatFormatters'),
-    require('./pages/parameterSelection/parameterSelection'),
+    require('./pages/instructorGeneratedAssessmentStatistics/instructorGeneratedAssessmentStatistics'),
 ]);
 app.use('/pl/course_instance/:course_instance_id/instructor/assessment_instance/:assessment_instance_id', [
     require('./middlewares/selectAndAuthzAssessmentInstance'),
@@ -339,6 +335,9 @@ app.use('/pl/course_instance/:course_instance_id/instructor/admin/lti', [
 app.use('/pl/course_instance/:course_instance_id/instructor/admin/course', [
     require('./middlewares/authzCourseInstanceHasCourseView'),
     require('./pages/courseOverview/courseOverview'),
+]);
+app.use('/pl/course_instance/:course_instance_id/instructor/admin/sdReduction', [
+    require('./pages/instructorAdminSdReduction/instructorAdminSdReduction'),
 ]);
 
 // clientFiles
