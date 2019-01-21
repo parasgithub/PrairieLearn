@@ -90,7 +90,7 @@ BEGIN
             iteration = iteration + 1;
         END LOOP;
 
-        num_sds = num_sds + 0.2;
+        num_sds = num_sds + 0.3;
     END LOOP;
 
 END;
@@ -122,5 +122,26 @@ BEGIN
             *
         FROM
             select_balanced_assessment_questions(assessment_id_var, max_iterations, num_sds, assessment_instance_id);
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+CREATE OR REPLACE FUNCTION
+    select_balanced_assessment_questions(
+        assessment_id_var BIGINT,
+        assessment_instance_id BIGINT DEFAULT NULL -- if provided, an existing assessment instance
+    ) RETURNS TABLE (
+        assessment_question_id BIGINT,
+        init_points DOUBLE PRECISION,
+        points_list DOUBLE PRECISION[],
+        question JSONB
+    ) AS $$
+DECLARE
+    num_sds DOUBLE PRECISION;
+BEGIN
+    RETURN QUERY
+        SELECT
+            *
+        FROM
+            select_balanced_assessment_questions(assessment_id_var, 10, assessment_instance_id);
 END;
 $$ LANGUAGE plpgsql VOLATILE;

@@ -40,7 +40,7 @@ BEGIN
                 generated_aq_ids.assessment_id
             FROM
                 generated_aq_ids
-                JOIN LATERAL calculate_quintile_stats(get_domain(generated_aq_ids.assessment_id), generated_aq_ids.generated_assessment_question_ids) quintile_stats (quintile INTEGER, mean DOUBLE PRECISION, sd DOUBLE PRECISION) ON TRUE
+                JOIN LATERAL calculate_quintile_stats(generated_aq_ids.generated_assessment_question_ids) quintile_stats (quintile INTEGER, mean DOUBLE PRECISION, sd DOUBLE PRECISION) ON TRUE
             ORDER BY
                 generated_aq_ids.assessment_id,
                 quintile_stats.quintile

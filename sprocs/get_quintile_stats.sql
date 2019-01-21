@@ -38,7 +38,7 @@ quintile_stats_object AS (
         generated_aq_ids.assessment_id
     FROM
         generated_aq_ids
-        JOIN LATERAL calculate_quintile_stats(get_domain(generated_aq_ids.assessment_id), generated_aq_ids.generated_assessment_question_ids) quintile_stats (quintile INTEGER, mean DOUBLE PRECISION, sd DOUBLE PRECISION) ON TRUE
+        JOIN LATERAL calculate_quintile_stats(generated_aq_ids.generated_assessment_question_ids) quintile_stats (quintile INTEGER, mean DOUBLE PRECISION, sd DOUBLE PRECISION) ON TRUE
     ORDER BY
 --         generated_aq_ids.assessment_id,
         quintile_stats.quintile
@@ -57,16 +57,17 @@ SELECT * FROM quintile_stats;
 END;
 $$;
 
-DROP FUNCTION IF EXISTS get_quintile_stats(BIGINT);
-CREATE FUNCTION get_quintile_stats(assessment_id_var BIGINT)
-    RETURNS TABLE(means DOUBLE PRECISION[], sds DOUBLE PRECISION[], assessment_id BIGINT)
+DROP FUNCTION IF EXISTS get_quintile_stats(BIGINT, INTEGER);
+CREATE FUNCTION get_quintile_stats(
+    assessment_id_var BIGINT,
+    sample_size INTEGER) RETURNS TABLE(means DOUBLE PRECISION[], sds DOUBLE PRECISION[], assessment_id BIGINT)
 LANGUAGE PLPGSQL
 AS $$
 BEGIN
     RETURN QUERY
         WITH generated_aq_ids AS (
             SELECT
-                get_randomly_generated_assessment_question_ids_multiple_reps(a.id, 1000) AS generated_assessment_question_ids
+                get_randomly_generated_assessment_question_ids_multiple_reps(a.id, sample_size) AS generated_assessment_question_ids
             FROM
                 assessments AS a
             WHERE
@@ -84,7 +85,7 @@ BEGIN
                 quintile_stats.*
             FROM
                 generated_aq_ids
-                JOIN LATERAL calculate_quintile_stats(get_domain(assessment_id_var), generated_aq_ids.generated_assessment_question_ids) quintile_stats (quintile INTEGER, mean DOUBLE PRECISION, sd DOUBLE PRECISION) ON TRUE
+                JOIN LATERAL calculate_quintile_stats(generated_aq_ids.generated_assessment_question_ids) quintile_stats (quintile INTEGER, mean DOUBLE PRECISION, sd DOUBLE PRECISION) ON TRUE
             ORDER BY
                 quintile_stats.quintile
         ),
@@ -97,5 +98,15 @@ BEGIN
                 quintile_stats_object
         )
     SELECT * FROM quintile_stats;
+END;
+$$;
+
+DROP FUNCTION IF EXISTS get_quintile_stats(BIGINT);
+CREATE FUNCTION get_quintile_stats(assessment_id_var BIGINT)
+    RETURNS TABLE(means DOUBLE PRECISION[], sds DOUBLE PRECISION[], assessment_id BIGINT)
+LANGUAGE PLPGSQL
+AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM get_quintile_stats(assessment_id_var, 1000);
 END;
 $$;
