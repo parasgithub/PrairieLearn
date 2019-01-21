@@ -4,8 +4,8 @@ const express = require('express');
 const router = express.Router();
 const debug = require('debug')('prairielearn:parameterSelection');
 
-const sqldb = require('../../lib/sqldb');
-const sqlLoader = require('../../lib/sql-loader');
+const sqldb = require('@prairielearn/prairielib/sql-db');
+const sqlLoader = require('@prairielearn/prairielib/sql-loader');
 
 const sql = sqlLoader.loadSqlEquiv(__filename);
 
@@ -17,6 +17,7 @@ router.get('/', function(req, res, next) {
                 assessment_id: res.locals.assessment.id,
                 num_sds: 1,
                 num_buckets: 30,
+                num_exams: 25
             };
 
             if (res.locals.assessment.num_sds) {
@@ -33,6 +34,7 @@ router.get('/', function(req, res, next) {
             
             res.locals.num_buckets = params.num_buckets;
             res.locals.num_sds = params.num_sds;
+            res.locals.num_exams = params.num_exams;
 
             sqldb.queryOneRow(sql.generated_assessment_distribution, params, function(err, result) {
                 if (ERR(err, callback)) return;

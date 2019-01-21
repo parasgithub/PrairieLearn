@@ -149,6 +149,12 @@ module.exports = {
             'weighted_arr_avg.sql',
             'get_domain.sql',
             'calculate_predicted_question_score.sql',
+            'calculate_predicted_question_score_sd.sql',
+            'calculate_predicted_question_points.sql',
+            'calculate_predicted_assessment_score.sql',
+            'calculate_predicted_question_score_quintiles.sql',
+            'calculate_predicted_question_points_quintiles.sql',
+            'calculate_predicted_assessment_score_quintiles.sql',
             'weighted_arr_avg_2d.sql',
             'calculate_predicted_score_for_randomly_generated_assessment.sql',
             'calculate_quintile_stats.sql',
@@ -158,12 +164,13 @@ module.exports = {
             'unnest_2d_to_1d.sql',
             'get_total_score.sql',
             'get_quintile_stats.sql',
-            'calculate_predicted_question_sd.sql',
             'assessments_calculate_generated_assessment_stats.sql',
             'select_balanced_assessment_questions.sql',
             'access_tokens_insert.sql',
             'access_tokens_delete.sql',
             'assessment_instances_points.sql',
+            'get_quintile_stats_using_saved_assessments.sql',
+            'array_sqrt.sql',
         ], function(filename, callback) {
             logger.verbose('Loading ' + filename);
             fs.readFile(path.join(__dirname, filename), 'utf8', function(err, sql) {

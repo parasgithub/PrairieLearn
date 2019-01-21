@@ -20,4 +20,22 @@ BEGIN
         RETURN NULL;
     END IF;
 END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION
+    get_domain(
+        IN assessment_id_var BIGINT,
+        OUT domain enum_statistic_domain
+)
+AS $$
+BEGIN
+    SELECT
+        get_domain(a.type, a.mode)
+    FROM
+        assessments AS a
+    WHERE
+        a.id = assessment_id_var
+    INTO
+        domain;
+END;
 $$ LANGUAGE plpgsql VOLATILE;

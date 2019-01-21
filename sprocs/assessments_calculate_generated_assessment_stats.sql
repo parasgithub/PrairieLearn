@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION
     assessments_calculate_generated_assessment_stats (
-        assessment_id_var BIGINT
+        assessment_id_var BIGINT,
+        num_exams INTEGER
     ) RETURNS VOID
 AS $$
 BEGIN
@@ -8,9 +9,22 @@ BEGIN
     -- calculate mean and sd for each quintile
     -- save to db
 
+    DELETE FROM generated_assessments;
+
+    WITH generated_aq_ids AS (
+        SELECT get_generated_aq_ids_multiple_reps_as_rows(assessment_id_var, num_exams) AS generated_aq_ids
+    )
+    INSERT INTO
+        generated_assessments (assessment_id, generated_aq_ids)
+    SELECT
+        assessment_id_var,
+        generated_aq_ids
+    FROM
+        generated_aq_ids;
+
     WITH generated_aq_ids AS (
         SELECT
-            get_randomly_generated_assessment_question_ids_multiple_reps(assessment_id_var, 1000) AS generated_assessment_question_ids
+            get_randomly_generated_assessment_question_ids_multiple_reps(assessment_id_var, num_exams) AS generated_assessment_question_ids
     ),
     generated_assessment_stats AS (
         SELECT
@@ -42,6 +56,16 @@ BEGIN
         generated_assessment_stats_last_updated = current_timestamp
     WHERE
         a.id = assessment_id_var;
+
+    INSERT INTO
+        generated_assessments_calculation_status (assessment_id, calculating)
+    SELECT
+        assessment_id_var,
+        FALSE
+    ON CONFLICT (assessment_id)
+        DO UPDATE SET
+          assessment_id=EXCLUDED.assessment_id,
+          calculating=EXCLUDED.calculating;
 
 END;
 $$ LANGUAGE plpgsql VOLATILE;

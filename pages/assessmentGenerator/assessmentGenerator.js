@@ -4,8 +4,8 @@ var express = require('express');
 var router = express.Router();
 var debug = require('debug')('prairielearn:assessmentGenerator');
 
-var sqldb = require('../../lib/sqldb');
-var sqlLoader = require('../../lib/sql-loader');
+const sqldb = require('@prairielearn/prairielib/sql-db');
+const sqlLoader = require('@prairielearn/prairielib/sql-loader');
 
 var sql = sqlLoader.loadSqlEquiv(__filename);
 
