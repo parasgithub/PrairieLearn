@@ -150,7 +150,7 @@ app.use(function(req, res, next) {res.locals.config = config; next();});
 app.use(function(req, res, next) {load.startJob('request', res.locals.response_id); next();});
 app.use(function(req, res, next) {
     onFinished(res, function (err, res) {
-        if (ERR(err, () => {})) logger.verbose('on-request-finished error', {err});
+        if (ERR(err, () => {})) logger.verbose('request on-response-finished error', {err, response_id: res.locals.response_id});
         load.endJob('request', res.locals.response_id);
     });
     next();
@@ -170,6 +170,7 @@ app.use('/pl/login', require('./pages/authLogin/authLogin'));
 // disable SEB until we can fix the mcrypt issues
 // app.use('/pl/downloadSEBConfig', require('./pages/studentSEBConfig/studentSEBConfig'));
 app.use(require('./middlewares/authn')); // authentication, set res.locals.authn_user
+app.use('/pl/api', require('./middlewares/authnToken')); // authn for the API, set res.locals.authn_user
 app.use(require('./middlewares/csrfToken')); // sets and checks res.locals.__csrf_token
 app.use(require('./middlewares/logRequest'));
 
@@ -177,7 +178,7 @@ app.use(require('./middlewares/logRequest'));
 app.use(function(req, res, next) {load.startJob('authed_request', res.locals.response_id); next();});
 app.use(function(req, res, next) {
     onFinished(res, function (err, res) {
-        if (ERR(err, () => {})) logger.verbose('on-request-finished error', {err});
+        if (ERR(err, () => {})) logger.verbose('authed_request on-response-finished error', {err, response_id: res.locals.response_id});
         load.endJob('authed_request', res.locals.response_id);
     });
     next();
@@ -246,7 +247,6 @@ app.use('/pl/course_instance/:course_instance_id/elements', require('./pages/ele
 //////////////////////////////////////////////////////////////////////
 // API ///////////////////////////////////////////////////////////////
 
-app.use('/pl/api', require('./middlewares/authnToken'));
 app.use('/pl/api/v1', require('./api/v1'));
 
 //////////////////////////////////////////////////////////////////////
@@ -501,11 +501,13 @@ module.exports.startServer = function(callback) {
         };
         server = https.createServer(options, app);
         server.listen(config.serverPort);
+        server.timeout = 600000; // 10 minutes
         logger.verbose('server listening to HTTPS on port ' + config.serverPort);
         callback(null);
     } else if (config.serverType === 'http') {
         server = http.createServer(app);
         server.listen(config.serverPort);
+        server.timeout = 600000; // 10 minutes
         logger.verbose('server listening to HTTP on port ' + config.serverPort);
         callback(null);
     } else {

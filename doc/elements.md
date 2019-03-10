@@ -88,6 +88,10 @@ Attribute | Type | Default | Description
 `atol` | number | 1e-8 | Absolute tolerance for `comparison="relabs"`.
 `digits` | integer | 2 | number of digits that must be correct for `comparison="sigfig"` or `comparison="decdig"`.
 `allow-complex` | boolean | False | Whether or not to allow complex numbers as answers. If the correct answer `ans` is a complex object, you should use `import prairielearn as pl` and `data['correct_answer'][answers-name] = pl.to_json(ans)`.
+`show-help-text` | boolean | True | Show the question mark at the end of the input displaying required input parameters.
+`show-placeholder` | boolean | True | Show the placeholder text that shows the default comparison.
+`size` | integer | 35 | Size of the input box.
+`show-correct-answer` | boolean | True | Whether to show the correct answer in the submitted answers panel.
 
 ## `pl-integer-input` element
 
@@ -107,7 +111,7 @@ Attribute | Type | Default | Description
 ## `pl-string-input` element
 
 ```html
-<pl-string-input answers_name="x"></pl-string-input>
+<pl-string-input answers-name="x"></pl-string-input>
 ```
 
 Attribute | Type | Default | Description
@@ -499,7 +503,7 @@ Attribute | Type | Default | Description
 Note that a 3D scene is also created to show each submitted answer. This means that if there are many submitted answers, the page will load slowly.
 
 
-## pl-code
+## `pl-code` element
 
 ```html
 <pl-code language="python">
@@ -516,6 +520,8 @@ Attribute | Type | Default | Description
 `no-highlight` | boolean | false | Disable highlighting.
 `source-file-name` | text | - | Name of the source file with existing code to be displayed as a code block (instead of writing the existing code between the element tags as illustrated in the above code snippet).
 `prevent-select` | booelan | false | Applies methods to make the source code more difficult to copy, like preventing selection or right-clicking. Note that the source code is still accessible in the page source, which will always be visible to students.
+`highlight-lines` | text | - | Apply a distinctive background highlight the specified lines of code. Accepts input like `4`, `1-3,5-10`, and `1,2-5,20`.
+`highlight-lines-color` | text | `#b3d7ff` | Specifies the color of highlighted lines of code.
 
 The `language` can be one of the following values.
 
@@ -555,3 +561,19 @@ The `language` can be one of the following values.
 `yaml` | YAML
 
 Please let the PrairieLearn developers know if you need a language that is not on the list above (any [highlight.js](https://highlightjs.org) language could be added).
+
+## `pl-graphviz-render` element
+
+```html
+<pl-graphviz-render>
+digraph G {
+  A -> B
+}
+</pl-graphviz-render>
+```
+
+This element uses [viz.js](https://github.com/mdaines/viz.js/) to render Graphviz DOT notation on the client.
+
+Attribute | Type | Default | Description
+--- | --- | --- | ---
+`engine` | string | dot | The rendering engine to use; supports `circo`, `dot`, `fdp`, `neato`, `osage`, and `twopi`.

@@ -8,11 +8,19 @@
   * Add predicted scores on instructor assessment page (Paras Sud)
   
   * Add exam generator page (Paras Sud)
+  * Add feedback for correct answers in submitted answer panel (Brian Mercer).
+
   * Add Learning Tools Interoperability LTI 1.1.1 tool provider functionality (Dave Mussulman).
 
   * Add course instance admin subpages (Dave Mussulman).
 
   * Add networkx Python library to plbase (Nathan Bowman).
+
+  * Add option to toggle placeholder help text for `pl-number-input` (James Balamuta and Nicolas Nytko).
+
+  * Add `size` attribute to `pl-number-input` (Nicolas Nytko).
+
+  * Add demo question showcasing all options for `pl-number-input` (James Balamuta and Nicolas Nytko).
 
   * Add read-only API for instructors to access assessment data (Nathan Walters).
 
@@ -24,12 +32,28 @@
 
   * Add more logging for external grading jobs in production (Matt West).
 
-  * Add documentation on common development errors to FAQ. (James Balamuta).
+  * Add documentation on common development errors to FAQ (James Balamuta).
 
   * Add R Data Packages and SQLite connection to centos-plbase. (James Balamuta).
 
-  * Add R package caching and parallel installation to centos-plbase. (James Balamuta).
-  
+  * Add R package caching and parallel installation to centos-plbase (James Balamuta).
+
+  * Add example script to download all course instance data from API (Matt West).
+
+  * Add default tags for semester Sp19 - Fa21 (James Balamuta).
+
+  * Add `pl-graphviz-render` element (Nathan Walters).
+
+  * Add Graphviz Yum package and Python library to centos7-plbase and centos7-python (Nicolas Nytko).
+
+  * Add a second example of reading XML code in from a file with `pl-code` (James Balamuta).
+
+  * Add ability to highlight the background of specific lines of text in `pl-code` (Nathan Walters).
+
+  * Add verbose flag to `tools/generate_uuid.py` to show all the files changed by script (Pavitra Shadvani).
+
+  * Add better logging of requests that don't have corresponding responses (Matt West).
+
   * Change "Save & Grade" button text and alignment (Dave Mussulman).
 
   * Change Ace editor to use source files from npm and upgrade to 1.4.1 from 1.2.8 (Nathan Walters).
@@ -39,6 +63,24 @@
   * Change Exam question generation to first-access time (Matt West).
 
   * Change assessment access rule examId linking to examUuid (Dave Mussulman).
+
+  * Change example question `fibonacciEditor` timeout to 20 s (Matt West).
+
+  * Change server timeout to 10 minutes (Matt West).
+
+  * Change API ID names to contain object type (Matt West).
+
+  * Change API object property names for improved consistency (Matt West).
+
+  * Change `highlight.js` from `9.12.01` to `9.13.1` in order to support `plaintext` highlighting (Nathan Walters).
+
+  * Change all packages to current versions (Matt West).
+
+  * Change logging format for new `winston` version (Matt West).
+
+  * Change instructor gradebook to have more optimized HTML for a smaller response (Nathan Walters).
+
+  * Change "timeout" external grader error to sound like the student's code is at fault (Matt West).
 
   * Fix load-reporting close during unit tests (Matt West).
 
@@ -57,10 +99,64 @@
   * Fix exclude file list for code coverage (Matt West).
 
   * Fix `dump_filter.sh` to keep `authn_users` in all tables (Matt West).
-  
+
   * Fix issues link on instructor question page (Nathan Walters).
 
   * Fix `users.lti_course_instance_id` foreign key delete action (Matt West).
+
+  * Fix missing `event-stream` dependency (Matt West).
+
+  * Fix `pl.inner_html(...)` helper function (Nathan Walters).
+
+  * Fix slow gradebook API by removing `last_submission_date` (Matt West).
+
+  * Fix API IDs to be JSON integers (Matt West).
+
+  * Fix underscore in `pl-string-input` docs (Matt West).
+
+  * Fix Python linter errors in (Matt West).
+
+  * Fix `pl-code` HTML escaping (Nathan Walters).
+
+  * Fix legacy question renderer by explicitly using `htmlparser2` for cheerio (Nathan Walters).
+
+  * Fix error message when a tag is missing (Matt West, h/t Mariana Silva).
+
+  * Fix GitHub links in `mkdocs.yml` (Eric Huber).
+
+  * Fix typo in documentation (Eric Huber).
+
+  * Fix docs for `examUuid` usage (Matt West).
+
+  * Fix `htmlparser2` config by copying default options from Cheerio (Nathan Walters).
+
+  * Fix traceback in console log for python errors (Tim Bretl).
+
+  * Fix render cache stats to limit to last day (Matt West).
+
+  * Fix escape sequence of code specified in the `source-file-name` options of `pl-code` (James Balamuta).
+
+  * Fix local grader not removing volumes associated with containers (Nathan Walters).
+
+  * Fix Python autograder container build (Matt West).
+
+  * Fix documentation to be more descriptive for local development with externally graded questions, especially in Windows. (Dave Mussulman, h/t James Balamuta, Mariana Silva, Zhenxi Zhou)
+
+  * Fix copy button (Tim Bretl).
+
+  * Fix TravisCI for Greenkeeper PRs (Matt West).
+
+  * Fix vulnerabilities in node packages (Nathan Walters).
+
+  * Fix regression from #1440 in Bootstrap popovers due to HTML sanitization (Matt West).
+
+  * Fix elements to work with the new sanitized popovers (Matt West).
+
+  * Fix documentation build on Read the Docs (Matt West).
+
+  * Fix editing popovers to work with the new sanitization defaults (Matt West).
+
+  * Fix `tools/generate_uuid.py` to not add UUID in element subdirectory (Pavitra Shadvani).
 
   * Remove `allowIssueReporting` option in `infoCourseInstance.json` (Matt West).
 
