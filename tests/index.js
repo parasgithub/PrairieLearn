@@ -24,4 +24,6 @@ after('drop the template database', helperDb.dropTemplate);
 //require('./testZoneGradingExam');
 //require('./testSproc-check_assessment_access');
 //require('./testExamSdReductionEnabled');
-require('./testExamSdReductionEnabledWithStatsPresent');
+//require('./testExamSdReductionEnabledWithStatsPresent');
+//require('./testWriteOutSdReductionData');
+require('./testWriteOutSdReductionData2');

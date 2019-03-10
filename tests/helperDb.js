@@ -19,7 +19,7 @@ var createFullDatabase = function(dbName, dropFirst, mochaThis, callback) {
     debug(`createFullDatabase(${dbName})`);
     // long timeout because DROP DATABASE might take a long time to error
     // if other processes have an open connection to that database
-    mochaThis.timeout(20000);
+    mochaThis.timeout(30000);
     var client;
     async.series([
         function(callback) {
