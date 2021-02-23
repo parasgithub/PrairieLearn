@@ -19,7 +19,7 @@ const sql = sqlLoader.loadSqlEquiv(__filename);
 const filenames = function(locals) {
     const prefix = sanitizeName.questionFilenamePrefix(locals.question, locals.course);
     return {
-        questionStatsCsvFilename: prefix + 'stats.csv',
+        questionStatsCsvFilename: prefix + 'overall_question_stats.csv',
     };
 };
 
@@ -106,12 +106,16 @@ router.post('/', function(req, res, next) {
             res.redirect(res.locals.urlPrefix + '/jobSequence/' + job_sequence_id);
         });
     } else if (req.body.__action == 'test_100') {
-        const count = 100;
-        const showDetails = false;
-        question.startTestQuestion(count, showDetails, res.locals.question, res.locals.course_instance, res.locals.course, res.locals.authn_user.user_id, (err, job_sequence_id) => {
-            if (ERR(err, next)) return;
-            res.redirect(res.locals.urlPrefix + '/jobSequence/' + job_sequence_id);
-        });
+        if (res.locals.question.grading_method !== 'External') {
+            const count = 100;
+            const showDetails = false;
+            question.startTestQuestion(count, showDetails, res.locals.question, res.locals.course_instance, res.locals.course, res.locals.authn_user.user_id, (err, job_sequence_id) => {
+                if (ERR(err, next)) return;
+                res.redirect(res.locals.urlPrefix + '/jobSequence/' + job_sequence_id);
+            });
+        } else {
+            next(new Error('Not supported for externally-graded questions'));
+        }
     } else if (req.body.__action == 'report_issue') {
         processIssue(req, res, function(err, variant_id) {
             if (ERR(err, next)) return;
@@ -132,23 +136,50 @@ router.get('/', function(req, res, next) {
         },
         (callback) => {
             sqldb.query(sql.assessment_question_stats, {question_id: res.locals.question.id}, function(err, result) {
-                if (ERR(err, callback)) return;
+                if (ERR(err, next)) return;
                 res.locals.assessment_stats = result.rows;
                 callback(null);
             });
         },
         (callback) => {
-            res.locals.question_attempts_histogram = null;
-            res.locals.question_attempts_before_giving_up_histogram = null;
-            res.locals.question_attempts_histogram_hw = null;
-            res.locals.question_attempts_before_giving_up_histogram_hw = null;
-            // res.locals.question_attempts_histogram = res.locals.result.question_attempts_histogram;
-            // res.locals.question_attempts_before_giving_up_histogram = res.locals.result.question_attempts_before_giving_up_histogram;
-            // res.locals.question_attempts_histogram_hw = res.locals.result.question_attempts_histogram_hw;
-            // res.locals.question_attempts_before_giving_up_histogram_hw = res.locals.result.question_attempts_before_giving_up_histogram_hw;
-            callback(null);
+            sqldb.query(sql.question_statistics, {question_id: res.locals.question.id}, function(err, result) {
+                if (ERR(err, next)) return;
+                let question_stats = [];
+                const exam_stats = result.rows.filter(function (row) {
+                    return row.domain === 'Exams';
+                })[0];
+                question_stats.push({
+                    domain_code: 'exams',
+                    domain_name: 'exams',
+                    stats: exam_stats,
+                });
+
+                const practice_exam_stats = result.rows.filter(function (row) {
+                    return row.domain === 'PracticeExams';
+                })[0];
+                question_stats.push({
+                    domain_code: 'practice_exams',
+                    domain_name: 'practice exams',
+                    stats: practice_exam_stats,
+                });
+
+                const hw_stats = result.rows.filter(function (row) {
+                    return row.domain === 'HWs';
+                })[0];
+                question_stats.push({
+                    domain_code: 'hws',
+                    domain_name: 'homeworks',
+                    stats: hw_stats,
+                });
+
+                res.locals.question_stats = question_stats;
+                res.locals.hw_stats = hw_stats;
+                res.locals.exam_stats = exam_stats;
+                // console.log(JSON.stringify(question_stats, null, 3));
+                callback(null);
+            });
         },
-        (callback) => {
+       (callback) => {
             // req.query.variant_id might be undefined, which will generate a new variant
             question.getAndRenderVariant(req.query.variant_id, res.locals, function(err) {
                 if (ERR(err, callback)) return;

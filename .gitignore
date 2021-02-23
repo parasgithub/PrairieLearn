@@ -1,5 +1,6 @@
 # JetBrains IDE files
 /.idea/
+**.iml
 
 # OS X Finder files
 **/.DS_Store
@@ -46,3 +47,12 @@ npm-debug.log
 __pycache__/
 *.py[cod]
 *$py.class
+
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# PrairieLearn SD reduction test files
+output/
